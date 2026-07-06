@@ -7,20 +7,6 @@ export async function signUp(username, password) {
       return { success: false, error: 'Username can only contain letters, numbers, underscores, and hyphens.' }
     }
 
-    const { data: existingUsers, error: checkError } = await supabase
-      .from('user_profile')
-      .select('username')
-      .eq('username', username)
-      .limit(1)
-
-    if (checkError) {
-      return { success: false, error: 'Failed to check username availability' }
-    }
-
-    if (existingUsers && existingUsers.length > 0) {
-      return { success: false, error: 'Username already taken. Please choose another.' }
-    }
-
     const { data, error } = await supabase.auth.signUp({
       email: `${username}@users.savingstracker.app`,
       password: password,

@@ -460,9 +460,9 @@
     </main>
 
     <script type="module">
-        import { supabase } from '../src/supabaseClient.js'
-        import { requireAuth, getUserProfile } from '../src/auth.js'
-        import { fetchGoals } from '../src/goals.js'
+        import { supabase } from './src/supabaseClient.js'
+        import { requireAuth, getUserProfile } from './src/auth.js'
+        import { fetchGoals } from './src/goals.js'
 
         const fmt = (n) => '₱' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
         const pct = (a, b) => b > 0 ? Math.min(100, Math.round((a / b) * 100)) : 0
