@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - SavingsTracker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #faf8ff;
+            background-image:
+                radial-gradient(rgba(139, 92, 246, 0.15) 1.5px, transparent 1.5px),
+                radial-gradient(rgba(236, 72, 153, 0.1) 1.5px, transparent 1.5px),
+                linear-gradient(135deg, #faf8ff 0%, #f3e8ff 50%, #fae8ff 100%);
+            background-size: 40px 40px, 40px 40px, 100% 100%;
+            background-position: 0 0, 20px 20px, 0 0;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        
+        nav {
+            background: white;
+            box-shadow: 0 2px 12px rgba(139, 92, 246, 0.04);
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.08);
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 70px;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links { display: flex; gap: 8px; align-items: center; }
+
+        .nav-links a {
+            padding: 9px 18px;
+            text-decoration: none;
+            color: #6b7280;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-size: 15px;
+        }
+
+        .nav-links a:hover { background: #f3f4f6; color: #1e1b4b; }
+
+        .nav-links a.active {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: white;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 36px 40px;
+        }
+
+        @media (max-width: 768px) {
+            main { padding: 24px 20px; }
+            nav { padding: 0 20px; }
+        }
+
+        
+        .profile-hero {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.04);
+            overflow: hidden;
+            margin-bottom: 24px;
+            border: 1px solid rgba(139, 92, 246, 0.06);
+            animation: cardEntrance 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(12px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .hero-banner {
+            height: 100px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+        }
+
+        .hero-body {
+            padding: 0 32px 32px;
+        }
+
+        .avatar-wrap {
+            margin-top: -44px;
+            margin-bottom: 16px;
+        }
+
+        .avatar {
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            border: 4px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(139,92,246,0.15);
+        }
+
+        .profile-username {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e1b4b;
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
+        }
+
+        .profile-meta {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 32px;
+            padding-top: 20px;
+            border-top: 1px solid #f3f4f6;
+            flex-wrap: wrap;
+        }
+
+        .hero-stat { text-align: center; }
+
+        .hero-stat-value {
+            font-size: 22px;
+            font-weight: 800;
+            color: #1e1b4b;
+        }
+
+        .hero-stat-label {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+
+        
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 600px) {
+            .cards-grid { grid-template-columns: 1fr; }
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.04);
+            border: 1px solid rgba(139, 92, 246, 0.06);
+        }
+
+        .info-card h3 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f9f9fb;
+            font-size: 14px;
+        }
+
+        .info-row:last-child { border-bottom: none; }
+        .info-row-label { color: #6b7280; font-weight: 500; }
+        .info-row-value { font-weight: 700; color: #1e1b4b; }
+
+        
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .badge-item {
+            background: #faf8ff;
+            border-radius: 16px;
+            padding: 18px 12px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .badge-item.earned {
+            background: #f5f3ff;
+            border-color: #ddd6fe;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.05);
+        }
+
+        .badge-item.earned:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.12);
+        }
+
+        .badge-item.locked { opacity: 0.35; filter: grayscale(1); }
+
+        .badge-icon { font-size: 32px; margin-bottom: 8px; }
+        .badge-name { font-size: 13px; font-weight: 700; color: #1e1b4b; margin-bottom: 4px; }
+        .badge-desc { font-size: 11px; color: #6b7280; font-weight: 500; }
+
+        
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: #1e1b4b; margin-bottom: 6px; }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #eef2f6;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            outline: none;
+            background: #fafafa;
+        }
+        .form-group input:focus { border-color: #8b5cf6; background: white; box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1); }
+
+        .btn {
+            padding: 11px 22px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8b5cf6, #6366f1);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        }
+
+        .btn-primary:hover { transform: translateY(-1.5px); box-shadow: 0 6px 16px rgba(139,92,246,0.3); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 2px solid transparent;
+        }
+
+        .btn-danger:hover { background: #dc2626; color: white; }
+
+        .actions { display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
+
+        .feedback {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .feedback.success { background: #d1fae5; color: #059669; border: 1px solid #a7f3d0; }
+        .feedback.error { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+
+        .member-since { color: #1e1b4b; }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 12px 16px;
+            }
+            .nav-container {
+                flex-direction: column;
+                height: auto;
+                gap: 12px;
+                padding: 4px 0;
+            }
+            .logo {
+                font-size: 20px;
+            }
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            .nav-links a {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+            main {
+                padding: 24px 16px;
+            }
+            .profile-hero {
+                border-radius: 16px;
+            }
+            .hero-body {
+                padding: 0 16px 20px;
+            }
+            .profile-username {
+                font-size: 20px;
+            }
+            .hero-stats {
+                gap: 16px;
+                justify-content: space-between;
+            }
+            .hero-stat-value {
+                font-size: 18px;
+            }
+            .actions {
+                flex-direction: column;
+            }
+            .actions button, .actions a {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">SavingsTracker</div>
+            <div class="nav-links">
+                <a href="cards.html">Cards</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="profile.html" class="active">Profile</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        
+        <div class="profile-hero">
+            <div class="hero-banner"></div>
+            <div class="hero-body">
+                <div class="avatar-wrap">
+                    <div class="avatar" id="avatarEl">?</div>
+                </div>
+                <div class="profile-username" id="profileUsername">Loading...</div>
+                <div class="profile-meta" id="profileMeta"></div>
+
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-stat-value" id="statGoals">—</div>
+                        <div class="hero-stat-label">Goals</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value" id="statSaved">—</div>
+                        <div class="hero-stat-label">Total Saved</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value" id="statCompleted">—</div>
+                        <div class="hero-stat-label">Completed</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-value" id="statProgress">—</div>
+                        <div class="hero-stat-label">Avg Progress</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cards-grid">
+            
+            <div class="info-card">
+                <h3>Account Info</h3>
+                <div class="info-row">
+                    <span class="info-row-label">Username</span>
+                    <span class="info-row-value" id="infoUsername">—</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-row-label">Member since</span>
+                    <span class="info-row-value member-since" id="infoMember">—</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-row-label">Account ID</span>
+                    <span class="info-row-value" id="infoId" style="font-size:12px; color:#bbb;">—</span>
+                </div>
+            </div>
+
+            
+            <div class="info-card">
+                <h3>Savings Summary</h3>
+                <div class="info-row">
+                    <span class="info-row-label">Total saved</span>
+                    <span class="info-row-value" id="sumSaved">—</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-row-label">Total target</span>
+                    <span class="info-row-value" id="sumTarget">—</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-row-label">Still needed</span>
+                    <span class="info-row-value" id="sumNeeded" style="color:#ef4444;">—</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-row-label">Goals active</span>
+                    <span class="info-row-value" id="sumActive">—</span>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="info-card" style="margin-bottom: 24px;">
+            <h3>Achievements</h3>
+            <div class="badges-grid" id="badgesGrid">
+                
+            </div>
+        </div>
+
+        
+        <div class="info-card">
+            <h3>Security</h3>
+            <div class="form-group">
+                <label>New Password</label>
+                <input type="password" id="newPassword" placeholder="Enter new password (min 6 chars)">
+            </div>
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" id="confirmPassword" placeholder="Repeat new password">
+            </div>
+            <div id="pwFeedback" class="feedback"></div>
+            <div class="actions" style="margin-top: 16px;">
+                <button class="btn btn-primary" onclick="changePassword()">Update Password</button>
+                <button class="btn btn-danger" onclick="logout()">Sign Out</button>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { supabase } from '../src/supabaseClient.js'
+        import { requireAuth, getUserProfile } from '../src/auth.js'
+        import { fetchGoals } from '../src/goals.js'
+
+        const fmt = (n) => '₱' + Number(n).toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+        const pct = (a, b) => b > 0 ? Math.min(100, Math.round((a / b) * 100)) : 0
+
+        async function init() {
+            const user = await requireAuth()
+            if (!user) return
+
+            const [profile, goals] = await Promise.all([
+                getUserProfile(user.id),
+                fetchGoals()
+            ])
+
+            const username = profile?.username || user.email?.split('@')[0] || 'User'
+            const initials = username.slice(0, 2).toUpperCase()
+            const joinDate = new Date(user.created_at)
+            const memberSince = joinDate.toLocaleDateString('en-PH', { month: 'long', year: 'numeric' })
+
+            document.getElementById('avatarEl').textContent = initials
+            document.getElementById('profileUsername').textContent = '@' + username
+            document.getElementById('profileMeta').textContent = `Member since ${memberSince}`
+
+            const totalSaved = goals.reduce((s, g) => s + g.current, 0)
+            const totalTarget = goals.reduce((s, g) => s + g.target, 0)
+            const completed = goals.filter(g => g.current >= g.target).length
+            const avgProgress = goals.length ? Math.round(goals.reduce((s, g) => s + pct(g.current, g.target), 0) / goals.length) : 0
+
+            document.getElementById('statGoals').textContent = goals.length
+            document.getElementById('statSaved').textContent = fmt(totalSaved)
+            document.getElementById('statCompleted').textContent = completed
+            document.getElementById('statProgress').textContent = avgProgress + '%'
+
+            document.getElementById('infoUsername').textContent = username
+            document.getElementById('infoMember').textContent = memberSince
+            document.getElementById('infoId').textContent = user.id.slice(0, 8) + '…'
+
+            document.getElementById('sumSaved').textContent = fmt(totalSaved)
+            document.getElementById('sumTarget').textContent = fmt(totalTarget)
+            document.getElementById('sumNeeded').textContent = fmt(Math.max(0, totalTarget - totalSaved))
+            document.getElementById('sumActive').textContent = goals.filter(g => g.current < g.target).length
+
+            renderAchievements(goals, totalSaved, completed)
+        }
+
+        function renderAchievements(goals, totalSaved, completed) {
+            const achievements = [
+                {
+                    icon: '🌱',
+                    name: 'First Goal',
+                    desc: 'Created first savings goal',
+                    earned: goals.length >= 1
+                },
+                {
+                    icon: '🎯',
+                    name: 'Goal Getter',
+                    desc: '3+ active goals',
+                    earned: goals.length >= 3
+                },
+                {
+                    icon: '💯',
+                    name: 'Finisher',
+                    desc: 'Completed a goal',
+                    earned: completed >= 1
+                },
+                {
+                    icon: '🏆',
+                    name: 'Champion',
+                    desc: '3+ goals completed',
+                    earned: completed >= 3
+                },
+                {
+                    icon: '💰',
+                    name: 'Saver',
+                    desc: 'Saved ₱10,000+',
+                    earned: totalSaved >= 10000
+                },
+                {
+                    icon: '💎',
+                    name: 'Big Saver',
+                    desc: 'Saved ₱100,000+',
+                    earned: totalSaved >= 100000
+                },
+                {
+                    icon: '🚀',
+                    name: 'Ambitious',
+                    desc: '5+ goals created',
+                    earned: goals.length >= 5
+                },
+                {
+                    icon: '⭐',
+                    name: 'All-Star',
+                    desc: '5+ goals completed',
+                    earned: completed >= 5
+                }
+            ]
+
+            document.getElementById('badgesGrid').innerHTML = achievements.map(a => `
+                <div class="badge-item ${a.earned ? 'earned' : 'locked'}">
+                    <div class="badge-icon">${a.icon}</div>
+                    <div class="badge-name">${a.name}</div>
+                    <div class="badge-desc">${a.desc}</div>
+                </div>
+            `).join('')
+        }
+
+        window.changePassword = async function() {
+            const newPw = document.getElementById('newPassword').value
+            const confirmPw = document.getElementById('confirmPassword').value
+            const feedback = document.getElementById('pwFeedback')
+
+            feedback.style.display = 'none'
+
+            if (newPw.length < 6) {
+                feedback.textContent = 'Password must be at least 6 characters.'
+                feedback.className = 'feedback error'
+                feedback.style.display = 'block'
+                return
+            }
+
+            if (newPw !== confirmPw) {
+                feedback.textContent = 'Passwords do not match.'
+                feedback.className = 'feedback error'
+                feedback.style.display = 'block'
+                return
+            }
+
+            const { error } = await supabase.auth.updateUser({ password: newPw })
+
+            if (error) {
+                feedback.textContent = error.message
+                feedback.className = 'feedback error'
+            } else {
+                feedback.textContent = '✅ Password updated successfully!'
+                feedback.className = 'feedback success'
+                document.getElementById('newPassword').value = ''
+                document.getElementById('confirmPassword').value = ''
+            }
+
+            feedback.style.display = 'block'
+        }
+
+        window.logout = async function() {
+            await supabase.auth.signOut()
+            window.location.href = '/signin.html'
+        }
+
+        init()
+    </script>
+</body>
+</html>

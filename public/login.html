@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - SavingsTracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #faf8ff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 1;
+            opacity: 0.5;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+
+        .blob-1 {
+            width: 400px;
+            height: 400px;
+            background: #d8b4fe;
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            width: 500px;
+            height: 500px;
+            background: #c084fc;
+            bottom: -150px;
+            right: -100px;
+            animation-delay: -5s;
+        }
+
+        .blob-3 {
+            width: 300px;
+            height: 300px;
+            background: #f472b6;
+            top: 50%;
+            left: 60%;
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(60px, 40px) scale(1.15); }
+            100% { transform: translate(-40px, -60px) scale(0.9); }
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(107, 33, 168, 0.08);
+            width: 100%;
+            max-width: 420px;
+            z-index: 10;
+            position: relative;
+            border: 1px solid rgba(139, 92, 246, 0.1);
+            animation: cardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            display: inline-block;
+            animation: bounce 3s infinite ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        h1 {
+            color: #1e1b4b;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4f46e5;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #eef2f6;
+            border-radius: 12px;
+            font-size: 16px;
+            color: #1e1b4b;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            background: #fafafa;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.25);
+            margin-top: 8px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(139, 92, 246, 0.35);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .switch {
+            text-align: center;
+            margin-top: 24px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .switch a {
+            color: #8b5cf6;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .switch a:hover {
+            color: #6366f1;
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: none;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid #fee2e2;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        .success-message {
+            background: #ecfdf5;
+            color: #059669;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: none;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid #d1fae5;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="container">
+        <div class="logo-area">
+            <div class="logo-icon">🚀</div>
+            <h1>Create Account</h1>
+            <p class="subtitle">Join SavingsTracker today</p>
+        </div>
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Choose a username" required minlength="3" maxlength="30" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a password" required minlength="6" autocomplete="new-password">
+            </div>
+            <button type="submit" id="submitBtn">Create Account</button>
+        </form>
+        <p class="switch">
+            Already have an account? <a href="signin.html">Sign In</a>
+        </p>
+    </div>
+
+    <script type="module">
+        import { signUp } from './src/auth.js'
+
+        const form = document.getElementById('loginForm')
+        const errorMessage = document.getElementById('errorMessage')
+        const successMessage = document.getElementById('successMessage')
+        const submitBtn = document.getElementById('submitBtn')
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault()
+
+            const username = document.getElementById('username').value.trim()
+            const password = document.getElementById('password').value
+
+            errorMessage.style.display = 'none'
+            successMessage.style.display = 'none'
+
+            if (username.length < 3) {
+                errorMessage.textContent = 'Username must be at least 3 characters long.'
+                errorMessage.style.display = 'block'
+                return
+            }
+
+            if (password.length < 6) {
+                errorMessage.textContent = 'Password must be at least 6 characters long.'
+                errorMessage.style.display = 'block'
+                return
+            }
+
+            submitBtn.disabled = true
+            submitBtn.textContent = 'Creating account...'
+
+            try {
+                const result = await signUp(username, password)
+
+                if (result.success) {
+                    if (result.requiresConfirmation) {
+                        successMessage.textContent = result.message || 'Account created! You can now sign in.'
+                        successMessage.style.display = 'block'
+                        setTimeout(() => {
+                            window.location.href = 'signin.html'
+                        }, 2000)
+                    } else {
+                        successMessage.textContent = 'Account created successfully! Redirecting...'
+                        successMessage.style.display = 'block'
+                        setTimeout(() => {
+                            window.location.href = 'cards.html'
+                        }, 1000)
+                    }
+                } else {
+                    errorMessage.textContent = result.error
+                    errorMessage.style.display = 'block'
+                    submitBtn.disabled = false
+                    submitBtn.textContent = 'Create Account'
+                }
+            } catch (err) {
+                errorMessage.textContent = 'An unexpected error occurred. Please try again.'
+                errorMessage.style.display = 'block'
+                submitBtn.disabled = false
+                submitBtn.textContent = 'Create Account'
+            }
+        })
+    </script>
+</body>
+</html>

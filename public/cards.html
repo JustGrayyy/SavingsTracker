@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cards - SavingsTracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #faf8ff;
+            background-image:
+                radial-gradient(rgba(139, 92, 246, 0.15) 1.5px, transparent 1.5px),
+                radial-gradient(rgba(236, 72, 153, 0.1) 1.5px, transparent 1.5px),
+                linear-gradient(135deg, #faf8ff 0%, #f3e8ff 50%, #fae8ff 100%);
+            background-size: 40px 40px, 40px 40px, 100% 100%;
+            background-position: 0 0, 20px 20px, 0 0;
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        
+        nav {
+            background: white;
+            box-shadow: 0 2px 12px rgba(139, 92, 246, 0.04);
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.08);
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 70px;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            padding: 9px 18px;
+            text-decoration: none;
+            color: #6b7280;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-size: 15px;
+        }
+
+        .nav-links a:hover {
+            background: #f3f4f6;
+            color: #1e1b4b;
+        }
+
+        .nav-links a.active {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: white;
+        }
+
+        .logout-btn {
+            padding: 9px 18px;
+            background: transparent;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            color: #6b7280;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background: #fef2f2;
+            border-color: #fca5a5;
+            color: #dc2626;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-name {
+            color: #4b5563;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 36px 40px;
+            padding-bottom: 120px;
+        }
+
+        h1 {
+            color: #1e1b4b;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 32px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        
+        .savings-card {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.04), 0 1px 3px rgba(139, 92, 246, 0.05);
+            border: 1px solid rgba(139, 92, 246, 0.08);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            animation: cardPop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes cardPop {
+            from { opacity: 0; transform: translateY(16px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .savings-card:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.12);
+            border-color: rgba(139, 92, 246, 0.2);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 130px;
+            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+            
+            background-image:
+                radial-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px),
+                linear-gradient(135deg, #ede9fe 0%, #fae8ff 100%);
+            background-size: 16px 16px, 100% 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.06);
+        }
+
+        .card-emoji-badge {
+            width: 72px;
+            height: 72px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.08);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .savings-card:hover .card-emoji-badge {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 12px 24px rgba(139, 92, 246, 0.18);
+        }
+
+        .card-settings {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 10;
+            border: 1px solid rgba(139, 92, 246, 0.08);
+        }
+
+        .card-settings:hover {
+            transform: rotate(45deg) scale(1.05);
+            box-shadow: 0 6px 14px rgba(139, 92, 246, 0.15);
+        }
+
+        .card-settings svg {
+            width: 16px;
+            height: 16px;
+            fill: #7c3aed;
+        }
+
+        .card-body {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e1b4b;
+            margin-bottom: 6px;
+        }
+
+        .card-description {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 20px;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        .progress-container {
+            margin-bottom: 16px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .progress-amount {
+            font-weight: 700;
+            color: #1e1b4b;
+        }
+
+        .progress-percent {
+            color: #8b5cf6;
+            font-weight: 700;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #ede9fe;
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            border-radius: 99px;
+            transform-origin: left;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .deadline-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 16px;
+            background: #f5f3ff;
+            padding: 4px 10px;
+            border-radius: 99px;
+            font-weight: 500;
+            align-self: flex-start;
+        }
+
+        .deadline-badge.overdue {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 11px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            border: none;
+        }
+
+        .btn-deposit {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        }
+
+        .btn-deposit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(139, 92, 246, 0.35);
+        }
+
+        .btn-deposit:active {
+            transform: translateY(0);
+        }
+
+        .btn-withdraw {
+            background: #faf8ff;
+            color: #7c3aed;
+            border: 2px solid #eef2f6;
+        }
+
+        .btn-withdraw:hover {
+            background: #f5f3ff;
+            border-color: #ddd6fe;
+        }
+
+        
+        .add-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.35);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border: none;
+            z-index: 90;
+        }
+
+        .add-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.45);
+        }
+
+        .add-btn svg {
+            width: 28px;
+            height: 28px;
+            fill: white;
+        }
+
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(30, 27, 75, 0.3);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 460px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 60px rgba(30, 27, 75, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.1);
+            transform: translateY(20px) scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            padding: 24px 28px;
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            color: #1e1b4b;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #faf8ff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #6b7280;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        .modal-body {
+            padding: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1e1b4b;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #eef2f6;
+            border-radius: 10px;
+            font-size: 15px;
+            color: #1e1b4b;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            background: #fafafa;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .image-picker {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .image-option {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: #faf8ff;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .image-option:hover {
+            background: #ede9fe;
+        }
+
+        .image-option.selected {
+            border-color: #8b5cf6;
+            background: #f5f3ff;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+        }
+
+        .modal-footer {
+            padding: 20px 28px;
+            border-top: 1px solid #f3f4f6;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .btn-cancel {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            background: #faf8ff;
+            color: #6b7280;
+            border: 2px solid #eef2f6;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background: #f3f4f6;
+        }
+
+        .btn-create {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(139, 92, 246, 0.3);
+        }
+
+        
+        .daily-savings {
+            background: #f5f3ff;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            text-align: center;
+            border: 1px solid rgba(139, 92, 246, 0.1);
+        }
+
+        .daily-savings-label {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .daily-savings-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #7c3aed;
+        }
+
+        .deposit-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .deposit-option {
+            flex: 1;
+            padding: 14px 10px;
+            border: 2px solid #eef2f6;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            background: white;
+        }
+
+        .deposit-option:hover {
+            border-color: #ddd6fe;
+        }
+
+        .deposit-option.selected {
+            border-color: #8b5cf6;
+            background: #f5f3ff;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.08);
+        }
+
+        .deposit-option-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e1b4b;
+        }
+
+        .deposit-option-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .custom-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #eef2f6;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .custom-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+
+        
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 24px;
+            border: 2px dashed #ede9fe;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.03);
+            max-width: 500px;
+            margin: 40px auto;
+        }
+
+        .empty-state-icon {
+            font-size: 54px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.08); }
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            color: #1e1b4b;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        
+        .modal-delete-btn {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: auto;
+            transition: all 0.2s;
+        }
+
+        .modal-delete-btn:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        
+        @media (max-width: 768px) {
+            nav {
+                padding: 12px 16px;
+            }
+            .nav-container {
+                flex-direction: column;
+                height: auto;
+                gap: 12px;
+                padding: 4px 0;
+            }
+            .logo {
+                font-size: 20px;
+            }
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            .nav-links a {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+            .user-info {
+                width: 100%;
+                justify-content: space-between;
+                border-top: 1px solid rgba(139, 92, 246, 0.05);
+                padding-top: 10px;
+                margin-top: 4px;
+            }
+            main {
+                padding: 24px 16px;
+                padding-bottom: 120px;
+            }
+            h1 {
+                font-size: 22px;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .modal {
+                width: 95%;
+                margin: 10px;
+            }
+            .modal-header, .modal-body, .modal-footer {
+                padding: 16px;
+            }
+            .image-picker {
+                gap: 6px;
+                justify-content: center;
+            }
+            .image-option {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+            .deposit-options {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .modal-footer {
+                flex-direction: column-reverse;
+                gap: 8px;
+            }
+            .modal-footer button, .modal-footer .modal-delete-btn {
+                width: 100%;
+                margin: 0;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">SavingsTracker</div>
+            <div class="nav-links">
+                <a href="cards.html" class="active">Cards</a>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="profile.html">Profile</a>
+            </div>
+            <div class="user-info">
+                <span class="user-name" id="userName"></span>
+                <button class="logout-btn" onclick="logout()">Sign Out</button>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <h1>Your Savings Goals</h1>
+        <div class="cards-grid" id="cardsGrid">
+            
+        </div>
+
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-state-icon">🏖️</div>
+            <h3>No savings goals yet</h3>
+            <p>Click the purple floating button below to create your first goal.</p>
+        </div>
+    </main>
+
+    
+    <button class="add-btn" onclick="openCreateModal()">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+    </button>
+
+    
+    <div class="modal-overlay" id="createModal" onclick="if(event.target === this) closeCreateModal()">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Create Savings Goal</h2>
+                <button class="modal-close" onclick="closeCreateModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Goal Name</label>
+                    <input type="text" id="goalName" placeholder="e.g., Japan Vacation">
+                </div>
+
+                <div class="form-group">
+                    <label>Icon/Image</label>
+                    <div class="image-picker" id="imagePicker">
+                        <div class="image-option selected" data-emoji="🏖️">🏖️</div>
+                        <div class="image-option" data-emoji="🚗">🚗</div>
+                        <div class="image-option" data-emoji="🏠">🏠</div>
+                        <div class="image-option" data-emoji="💻">💻</div>
+                        <div class="image-option" data-emoji="📚">📚</div>
+                        <div class="image-option" data-emoji="💍">💍</div>
+                        <div class="image-option" data-emoji="🎮">🎮</div>
+                        <div class="image-option" data-emoji="✈️">✈️</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Target Amount (₱)</label>
+                    <input type="number" id="targetAmount" placeholder="e.g. 50000" min="1">
+                </div>
+
+                <div class="form-group">
+                    <label>Deadline (Optional)</label>
+                    <input type="date" id="deadline">
+                </div>
+
+                <div class="form-group">
+                    <label>Notes/Description</label>
+                    <textarea id="goalNotes" placeholder="What are you saving for?"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-delete-btn" id="deleteBtn" style="display: none;" onclick="triggerDeleteGoal()">Delete Goal</button>
+                <button class="btn-cancel" onclick="closeCreateModal()">Cancel</button>
+                <button class="btn-create" id="saveBtn" onclick="saveGoal()">Create Goal</button>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="modal-overlay" id="depositModal" onclick="if(event.target === this) closeDepositModal()">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Deposit to Goal</h2>
+                <button class="modal-close" onclick="closeDepositModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="daily-savings">
+                    <div class="daily-savings-label">Daily Savings Target</div>
+                    <div class="daily-savings-value" id="dailySavings">₱0</div>
+                </div>
+
+                <div class="deposit-options" id="depositOptions">
+                    <div class="deposit-option" onclick="selectDeposit(this)">
+                        <div class="deposit-option-value" id="quickDeposit1">₱0</div>
+                        <div class="deposit-option-label">Daily</div>
+                    </div>
+                    <div class="deposit-option" onclick="selectDeposit(this)">
+                        <div class="deposit-option-value" id="quickDeposit7">₱0</div>
+                        <div class="deposit-option-label">Weekly</div>
+                    </div>
+                    <div class="deposit-option selected" onclick="selectDeposit(this)">
+                        <div class="deposit-option-value" id="quickDeposit30">₱0</div>
+                        <div class="deposit-option-label">Monthly</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Custom Amount (₱)</label>
+                    <input type="number" class="custom-input" id="customDeposit" placeholder="Enter amount" min="1">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeDepositModal()">Cancel</button>
+                <button class="btn-create" onclick="makeDeposit()">Deposit</button>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="modal-overlay" id="withdrawModal" onclick="if(event.target === this) closeWithdrawModal()">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Withdraw from Goal</h2>
+                <button class="modal-close" onclick="closeWithdrawModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Withdrawal Amount (₱)</label>
+                    <input type="number" class="custom-input" id="withdrawAmount" placeholder="Enter amount" min="1">
+                </div>
+                <p style="font-size: 14px; color: #6b7280;">Current balance: <strong id="currentBalance" style="color: #1e1b4b;">₱0</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeWithdrawModal()">Cancel</button>
+                <button class="btn-create" onclick="makeWithdrawal()">Withdraw</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './src/supabaseClient.js'
+        import { fetchGoals, createGoal, updateGoal, deleteGoal, depositToGoal, withdrawFromGoal } from './src/goals.js'
+
+        async function checkAuth() {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) {
+                window.location.href = '/signin.html'
+                return null
+            }
+            return user
+        }
+
+        async function getUsername() {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return 'User'
+            const { data: profile } = await supabase
+                .from('user_profile')
+                .select('username')
+                .eq('id', user.id)
+                .single()
+            return profile?.username || user.email?.split('@')[0] || 'User'
+        }
+
+        window.logout = async function() {
+            await supabase.auth.signOut()
+            window.location.href = '/signin.html'
+        }
+
+        let goals = [];
+        let currentGoalId = null;
+        let selectedEmoji = '🏖️';
+        let editingGoalId = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await checkAuth()
+            if (!user) return
+
+            const username = await getUsername()
+            document.getElementById('userName').textContent = '@' + username
+
+            goals = await fetchGoals();
+            renderGoals();
+            setupImagePicker();
+        });
+
+        function renderGoals() {
+            const grid = document.getElementById('cardsGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            if (goals.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            grid.innerHTML = goals.map(goal => {
+                const progress = (goal.current / goal.target) * 100;
+                const daysLeft = goal.deadline ? Math.ceil((new Date(goal.deadline) - new Date()) / (1000 * 60 * 60 * 24)) : null;
+
+                let deadlineHtml = '';
+                if (daysLeft !== null) {
+                    if (daysLeft < 0) {
+                        deadlineHtml = `<div class="deadline-badge overdue">⏳ Overdue by ${Math.abs(daysLeft)} days</div>`;
+                    } else if (daysLeft === 0) {
+                        deadlineHtml = `<div class="deadline-badge overdue" style="background:#fff7ed;color:#ea580c">⏳ Due today!</div>`;
+                    } else {
+                        deadlineHtml = `<div class="deadline-badge">⏳ ${daysLeft} days left</div>`;
+                    }
+                }
+
+                return `
+                    <div class="savings-card">
+                        <div class="card-image">
+                            <div class="card-emoji-badge">${goal.emoji}</div>
+                            <div class="card-settings" onclick="openEditModal('${goal.id}')">
+                                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-title">${goal.name}</div>
+                            <div class="card-description">${goal.notes || 'No description'}</div>
+
+                            <div class="progress-container">
+                                <div class="progress-header">
+                                    <span class="progress-amount">₱${goal.current.toLocaleString()} / ₱${goal.target.toLocaleString()}</span>
+                                    <span class="progress-percent">${Math.min(100, Math.round(progress))}%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="transform: scaleX(${Math.min(progress, 100) / 100})"></div>
+                                </div>
+                            </div>
+
+                            ${deadlineHtml}
+
+                            <div class="card-actions">
+                                <button class="btn btn-deposit" onclick="openDepositModal('${goal.id}')">Deposit</button>
+                                <button class="btn btn-withdraw" onclick="openWithdrawModal('${goal.id}')">Withdraw</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setupImagePicker() {
+            const picker = document.getElementById('imagePicker');
+            picker.querySelectorAll('.image-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    picker.querySelectorAll('.image-option').forEach(o => o.classList.remove('selected'));
+                    option.classList.add('selected');
+                    selectedEmoji = option.dataset.emoji;
+                });
+            });
+        }
+
+        window.openCreateModal = function() {
+            editingGoalId = null;
+            document.getElementById('modalTitle').textContent = 'Create Savings Goal';
+            document.getElementById('goalName').value = '';
+            document.getElementById('targetAmount').value = '';
+            document.getElementById('deadline').value = '';
+            document.getElementById('goalNotes').value = '';
+            document.getElementById('saveBtn').textContent = 'Create Goal';
+            document.getElementById('deleteBtn').style.display = 'none';
+
+            const picker = document.getElementById('imagePicker');
+            picker.querySelectorAll('.image-option').forEach(o => o.classList.remove('selected'));
+            picker.querySelector('.image-option').classList.add('selected');
+            selectedEmoji = '🏖️';
+
+            const overlay = document.getElementById('createModal');
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('active'), 10);
+        }
+
+        window.openEditModal = function(goalId) {
+            const goal = goals.find(g => g.id === goalId);
+            if (!goal) return;
+
+            editingGoalId = goalId;
+            document.getElementById('modalTitle').textContent = 'Edit Savings Goal';
+            document.getElementById('goalName').value = goal.name;
+            document.getElementById('targetAmount').value = goal.target;
+            document.getElementById('deadline').value = goal.deadline || '';
+            document.getElementById('goalNotes').value = goal.notes || '';
+            document.getElementById('saveBtn').textContent = 'Save Changes';
+            document.getElementById('deleteBtn').style.display = 'block';
+
+            const picker = document.getElementById('imagePicker');
+            picker.querySelectorAll('.image-option').forEach(o => {
+                o.classList.remove('selected');
+                if (o.dataset.emoji === goal.emoji) {
+                    o.classList.add('selected');
+                    selectedEmoji = goal.emoji;
+                }
+            });
+
+            const overlay = document.getElementById('createModal');
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('active'), 10);
+        }
+
+        window.closeCreateModal = function() {
+            const overlay = document.getElementById('createModal');
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.style.display = 'none', 300);
+        }
+
+        window.saveGoal = async function() {
+            const name = document.getElementById('goalName').value.trim();
+            const target = parseFloat(document.getElementById('targetAmount').value);
+            const deadline = document.getElementById('deadline').value;
+            const notes = document.getElementById('goalNotes').value.trim();
+
+            if (!name || !target || target <= 0) {
+                alert('Please enter a valid name and target amount');
+                return;
+            }
+
+            const goalData = {
+                name,
+                target,
+                deadline: deadline || null,
+                notes,
+                emoji: selectedEmoji
+            };
+
+            if (editingGoalId) {
+                const result = await updateGoal(editingGoalId, goalData);
+                if (result.success) {
+                    const goalIndex = goals.findIndex(g => g.id === editingGoalId);
+                    if (goalIndex !== -1) {
+                        goals[goalIndex] = result.goal;
+                    }
+                } else {
+                    alert('Failed to update goal: ' + result.error);
+                    return;
+                }
+            } else {
+                const result = await createGoal(goalData);
+                if (result.success) {
+                    goals.unshift(result.goal);
+                } else {
+                    alert('Failed to create goal: ' + result.error);
+                    return;
+                }
+            }
+
+            closeCreateModal();
+            renderGoals();
+        }
+
+        window.triggerDeleteGoal = async function() {
+            if (!editingGoalId) return;
+            if (!confirm('Are you sure you want to delete this savings goal?')) return;
+
+            const result = await deleteGoal(editingGoalId);
+            if (result.success) {
+                goals = goals.filter(g => g.id !== editingGoalId);
+                closeCreateModal();
+                renderGoals();
+            } else {
+                alert('Failed to delete goal: ' + result.error);
+            }
+        }
+
+        window.openDepositModal = function(goalId) {
+            currentGoalId = goalId;
+            const goal = goals.find(g => g.id === goalId);
+            if (!goal) return;
+
+            const daysLeft = goal.deadline ? Math.ceil((new Date(goal.deadline) - new Date()) / (1000 * 60 * 60 * 24)) : null;
+            const remaining = goal.target - goal.current;
+            const dailyAmount = daysLeft && daysLeft > 0 ? Math.max(0, Math.round(remaining / daysLeft)) : 0;
+
+            document.getElementById('dailySavings').textContent = '₱' + dailyAmount.toLocaleString();
+            document.getElementById('quickDeposit1').textContent = '₱' + dailyAmount.toLocaleString();
+            document.getElementById('quickDeposit7').textContent = '₱' + (dailyAmount * 7).toLocaleString();
+            document.getElementById('quickDeposit30').textContent = '₱' + (dailyAmount * 30).toLocaleString();
+            document.getElementById('customDeposit').value = dailyAmount > 0 ? dailyAmount : 500;
+
+            document.querySelectorAll('.deposit-option').forEach(o => o.classList.remove('selected'));
+            document.getElementById('depositOptions').children[2].classList.add('selected')
+
+            const overlay = document.getElementById('depositModal');
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('active'), 10);
+        }
+
+        window.closeDepositModal = function() {
+            const overlay = document.getElementById('depositModal');
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.style.display = 'none', 300);
+        }
+
+        window.selectDeposit = function(element) {
+            document.querySelectorAll('.deposit-option').forEach(o => o.classList.remove('selected'));
+            element.classList.add('selected');
+            const valStr = element.querySelector('.deposit-option-value').textContent.replace('₱', '').replace(/,/g, '');
+            document.getElementById('customDeposit').value = parseInt(valStr) || 0;
+        }
+
+        window.makeDeposit = async function() {
+            const amount = parseFloat(document.getElementById('customDeposit').value);
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            const result = await depositToGoal(currentGoalId, amount);
+            if (result.success) {
+                const goalIndex = goals.findIndex(g => g.id === currentGoalId);
+                if (goalIndex !== -1) {
+                    goals[goalIndex] = result.goal;
+                }
+                closeDepositModal();
+                renderGoals();
+            } else {
+                alert('Failed to deposit: ' + result.error);
+            }
+        }
+
+        window.openWithdrawModal = function(goalId) {
+            currentGoalId = goalId;
+            const goal = goals.find(g => g.id === goalId);
+            if (!goal) return;
+
+            document.getElementById('currentBalance').textContent = '₱' + goal.current.toLocaleString();
+            document.getElementById('withdrawAmount').value = '';
+            document.getElementById('withdrawAmount').max = goal.current;
+
+            const overlay = document.getElementById('withdrawModal');
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('active'), 10);
+        }
+
+        window.closeWithdrawModal = function() {
+            const overlay = document.getElementById('withdrawModal');
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.style.display = 'none', 300);
+        }
+
+        window.makeWithdrawal = async function() {
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const goalIndex = goals.findIndex(g => g.id === currentGoalId);
+
+            if (goalIndex === -1) return;
+
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+
+            if (amount > goals[goalIndex].current) {
+                alert('Cannot withdraw more than current balance');
+                return;
+            }
+
+            const result = await withdrawFromGoal(currentGoalId, amount);
+            if (result.success) {
+                goals[goalIndex] = result.goal;
+                closeWithdrawModal();
+                renderGoals();
+            } else {
+                alert('Failed to withdraw: ' + result.error);
+            }
+        }
+    </script>
+</body>
+</html>
