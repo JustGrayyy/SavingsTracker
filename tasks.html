@@ -293,77 +293,7 @@
             color: var(--bg);
         }
 
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: var(--space-4);
-            z-index: var(--z-modal);
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity var(--duration-normal) var(--ease-out), visibility var(--duration-normal) var(--ease-out);
-        }
-
-        .modal-overlay.open {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: var(--space-4);
-            width: 100%;
-            max-width: 480px;
-            max-height: 90vh;
-            overflow-y: auto;
-            transform: translateY(20px) scale(0.98);
-            transition: transform var(--duration-normal) var(--ease-out-expo);
-        }
-
-        .modal-overlay.open .modal {
-            transform: translateY(0) scale(1);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--space-3);
-        }
-
-        .modal-header h2,
-        .modal-header h3 {
-            font-size: var(--text-xl);
-            color: var(--text-primary);
-        }
-
-        .modal-close {
-            width: 32px;
-            height: 32px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            background: var(--bg-elevated);
-            color: var(--text-secondary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all var(--duration-fast) var(--ease-out);
-        }
-
-        .modal-close:hover {
-            background: var(--bg-hover);
-            border-color: var(--border-strong);
-            color: var(--text-primary);
-        }
-
+        /* Form layout inside task modal (theme owns .modal-overlay / .active) */
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -410,55 +340,6 @@
             min-height: 80px;
             resize: vertical;
             font-family: inherit;
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: var(--space-2);
-            margin-top: var(--space-3);
-            padding-top: var(--space-3);
-            border-top: 1px solid var(--border);
-        }
-
-        .btn {
-            padding: 10px 16px;
-            border-radius: var(--radius-sm);
-            font-size: var(--text-sm);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--duration-fast) var(--ease-out);
-        }
-
-        .btn-primary {
-            border: none;
-            background: var(--accent);
-            color: var(--bg);
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-hover);
-        }
-
-        .btn-secondary {
-            border: 1px solid var(--border);
-            background: var(--bg-elevated);
-            color: var(--text-primary);
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-hover);
-            border-color: var(--border-strong);
-        }
-
-        .btn-danger {
-            border: none;
-            background: var(--error);
-            color: var(--text-primary);
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
         }
 
         .empty-state {
@@ -844,7 +725,7 @@
             document.getElementById('modalTitle').textContent = 'Create Task'
             document.getElementById('saveBtn').textContent = 'Create Task'
             document.getElementById('deleteBtn').style.display = 'none'
-            document.getElementById('taskModal').classList.add('open')
+            document.getElementById('taskModal').classList.add('active')
         }
 
         function openEditModal(id) {
@@ -863,12 +744,12 @@
             document.getElementById('modalTitle').textContent = 'Edit Task'
             document.getElementById('saveBtn').textContent = 'Save Changes'
             document.getElementById('deleteBtn').style.display = 'inline-flex'
-            document.getElementById('taskModal').classList.add('open')
+            document.getElementById('taskModal').classList.add('active')
         }
 
         function closeModal(e) {
             if (e && e.target && e.currentTarget && e.target !== e.currentTarget) return
-            document.getElementById('taskModal').classList.remove('open')
+            document.getElementById('taskModal').classList.remove('active')
             currentEditId = null
         }
 
