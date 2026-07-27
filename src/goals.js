@@ -18,7 +18,7 @@ export async function fetchGoals() {
     current: parseFloat(goal.current),
     deadline: goal.deadline,
     notes: goal.notes,
-    emoji: goal.emoji || '🏖️'
+    emoji: goal.emoji || '🖼️'
   }))
 }
 
@@ -37,7 +37,7 @@ export async function createGoal(goalData) {
       current: 0,
       deadline: goalData.deadline || null,
       notes: goalData.notes || null,
-      emoji: goalData.emoji || '🏖️'
+      emoji: goalData.emoji || '🖼️'
     })
     .select()
     .single()
@@ -95,14 +95,19 @@ export async function updateGoal(goalId, goalData) {
 }
 
 export async function deleteGoal(goalId) {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('savings_goal')
     .delete()
     .eq('id', goalId)
+    .select('id')
 
   if (error) {
     console.error('Error deleting goal:', error)
     return { success: false, error: error.message }
+  }
+
+  if (!data || data.length === 0) {
+    return { success: false, error: 'Delete failed — no row removed (check auth / RLS)' }
   }
 
   return { success: true }

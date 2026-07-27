@@ -1,7 +1,7 @@
 {
-  "name": "savingstracker-app",
+  "name": "multitracker-app",
   "version": "1.0.0",
-  "description": "Savings tracking application",
+  "description": "MultiTracker — savings and academic task tracking",
   "type": "module",
   "scripts": {
     "dev": "vite",

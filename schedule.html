@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Schedule - MultiTracker</title>
+    <link rel="stylesheet" href="/src/theme.css">
+    <link rel="stylesheet" href="/src/nav.css">
+    <style>
+        /* Page-specific styles - theme.css provides base dark theme */
+
+        /* Navigation provided by nav.css */
+
+        main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: var(--space-3) var(--space-4) var(--space-8);
+        }
+
+        h1 {
+            font-size: var(--text-3xl);
+            margin-bottom: var(--space-1);
+        }
+
+        .page-sub {
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-3);
+        }
+
+        /* Timetable */
+        .timetable-wrap {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: var(--space-4);
+        }
+
+        .timetable-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .timetable {
+            display: grid;
+            grid-template-columns: 64px repeat(7, minmax(110px, 1fr));
+            min-width: 840px;
+            position: relative;
+        }
+
+        .tt-corner {
+            position: sticky;
+            left: 0;
+            z-index: 3;
+            background: var(--bg-elevated);
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+        }
+
+        .tt-day {
+            padding: var(--space-2) var(--space-1);
+            text-align: center;
+            font-size: var(--text-xs);
+            font-weight: 700;
+            color: var(--text-secondary);
+            background: var(--bg-elevated);
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--ease-out);
+            user-select: none;
+        }
+
+        .tt-day:hover {
+            background: var(--bg-hover);
+            color: var(--accent);
+        }
+
+        .tt-day.active {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .tt-day .dow {
+            display: block;
+            font-size: var(--text-xs);
+            font-weight: 700;
+            opacity: 0.85;
+            text-transform: uppercase;
+            letter-spacing: var(--tracking-eyebrow);
+        }
+
+        .tt-day .dlabel {
+            display: block;
+            margin-top: 2px;
+            font-size: var(--text-sm);
+        }
+
+        .tt-time {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: var(--text-xs);
+            font-weight: 600;
+            color: var(--text-muted);
+            padding: 4px 6px;
+            text-align: right;
+            height: 48px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-end;
+        }
+
+        .tt-cell {
+            height: 48px;
+            border-right: 1px solid var(--border-subtle);
+            border-bottom: 1px solid var(--border-subtle);
+            cursor: pointer;
+            position: relative;
+            transition: background var(--duration-fast) var(--ease-out);
+        }
+
+        .tt-cell:hover {
+            background: var(--bg-hover);
+        }
+
+        .tt-cell.active-col {
+            background: var(--accent-muted);
+        }
+
+        .tt-cell.lunch-band {
+            background: repeating-linear-gradient(-45deg, var(--bg-elevated), var(--bg-elevated) 6px, var(--bg-hover) 6px, var(--bg-hover) 12px);
+        }
+
+        .tt-body {
+            position: relative;
+            grid-column: 2 / -1;
+            /* filled via absolute slots over a CSS grid of empty cells — we use cell grid only */
+        }
+
+        .slot-card {
+            position: absolute;
+            left: 3px;
+            right: 3px;
+            border-radius: var(--radius-sm);
+            padding: 6px 8px;
+            color: var(--bg);
+            font-size: 11px;
+            font-weight: 600;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            z-index: 4;
+            transition: transform var(--duration-fast) var(--ease-out),
+                        box-shadow var(--duration-fast) var(--ease-out);
+            line-height: 1.25;
+        }
+
+        @media (hover: hover) {
+            .slot-card:hover {
+                transform: translateY(-1px);
+                box-shadow: var(--shadow-md);
+                z-index: 5;
+            }
+        }
+
+        .slot-card:active {
+            transform: scale(0.98);
+        }
+
+        .slot-card .sc-name {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .slot-card .sc-meta {
+            opacity: 0.9;
+            font-weight: 600;
+            font-size: var(--text-xs);
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .slot-card.break-slot {
+            background: var(--text-muted) !important;
+            color: var(--text-primary);
+            border: 1px dashed var(--border-strong);
+        }
+
+        .slot-card.event-slot {
+            background: var(--accent) !important;
+            color: var(--bg);
+            border: 1px dashed rgba(10, 10, 10, 0.35);
+            font-style: italic;
+        }
+
+        /* Daily Overview */
+        .overview-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: var(--space-2);
+            gap: var(--space-2);
+            flex-wrap: wrap;
+        }
+
+        .overview-header h2 {
+            font-size: var(--text-xl);
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .overview-header .active-label {
+            font-size: var(--text-sm);
+            color: var(--accent);
+            font-weight: 600;
+            background: var(--accent-muted);
+            padding: 6px 12px;
+            border-radius: var(--radius-full);
+        }
+
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-3);
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            display: flex;
+            flex-direction: column;
+            min-height: 280px;
+            max-height: 420px;
+        }
+
+        .panel-head {
+            padding: var(--space-2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-2);
+        }
+
+        .panel-head h3 {
+            font-size: var(--text-sm);
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .panel-add {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: var(--bg-elevated);
+            color: var(--accent);
+            font-size: var(--text-lg);
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--duration-fast) var(--ease-out);
+        }
+
+        .panel-add:hover {
+            background: var(--accent-muted);
+            transform: scale(1.05);
+        }
+
+        .panel-body {
+            padding: var(--space-2);
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .empty-mini {
+            text-align: center;
+            padding: var(--space-5) var(--space-2);
+            color: var(--text-muted);
+            font-size: var(--text-sm);
+        }
+
+        /* Events */
+        .event-item {
+            padding: var(--space-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            margin-bottom: var(--space-1);
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--ease-out);
+            background: var(--bg-elevated);
+        }
+
+        .event-item:hover {
+            border-color: var(--accent);
+            background: var(--bg-hover);
+        }
+
+        .event-item .ei-title {
+            font-size: var(--text-sm);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .event-item .ei-meta {
+            font-size: var(--text-xs);
+            color: var(--text-secondary);
+            margin-top: 3px;
+            display: flex;
+            gap: var(--space-1);
+            flex-wrap: wrap;
+        }
+
+        /* Deadlines */
+        .deadline-item {
+            padding: var(--space-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            margin-bottom: var(--space-1);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: var(--bg-elevated);
+            border-top: 3px solid var(--border-strong);
+        }
+
+        .deadline-item.priority-urgent { border-top-color: var(--priority-urgent); }
+        .deadline-item.priority-high { border-top-color: var(--priority-high); }
+        .deadline-item.priority-medium { border-top-color: var(--priority-medium); }
+        .deadline-item.priority-low { border-top-color: var(--priority-low); }
+        .deadline-item.overdue-item { background: var(--error-bg); }
+
+        .deadline-item .di-title {
+            font-size: var(--text-sm);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .deadline-item .di-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .deadline-item a {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: var(--text-xs);
+            font-weight: 600;
+        }
+
+        .deadline-item a:hover {
+            text-decoration: underline;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: var(--radius-full);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .status-todo { background: var(--priority-low-bg); color: var(--priority-low); }
+        .status-in_progress { background: var(--warning-bg); color: var(--warning); }
+        .status-done { background: var(--success-bg); color: var(--success); }
+        .status-overdue { background: var(--error-bg); color: var(--error); }
+        .priority-low { background: var(--priority-low-bg); color: var(--priority-low); }
+        .priority-medium { background: var(--priority-medium-bg); color: var(--priority-medium); }
+        .priority-high { background: var(--priority-high-bg); color: var(--priority-high); }
+        .priority-urgent { background: var(--priority-urgent-bg); color: var(--priority-urgent); }
+        .subject-chip { background: var(--accent-muted); color: var(--accent); }
+
+        /* Todos */
+        .todo-add-row {
+            display: flex;
+            gap: var(--space-1);
+            margin-bottom: var(--space-2);
+        }
+
+        .todo-add-row input {
+            flex: 1;
+            padding: var(--space-2);
+            font-size: var(--text-sm);
+        }
+
+        .todo-add-row button {
+            padding: var(--space-2) var(--space-2);
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            font-size: var(--text-sm);
+            cursor: pointer;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-2);
+            padding: var(--space-2);
+            border-radius: var(--radius-sm);
+            margin-bottom: 4px;
+            transition: background var(--duration-fast) var(--ease-out);
+        }
+
+        .todo-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .todo-item.done {
+            opacity: 0.5;
+        }
+
+        .todo-item.done .todo-title {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .todo-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            accent-color: var(--accent);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .todo-title {
+            flex: 1;
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+            word-break: break-word;
+        }
+
+        .todo-del {
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: var(--text-base);
+            padding: 0 4px;
+            line-height: 1;
+        }
+
+        .todo-del:hover {
+            color: var(--error);
+        }
+
+        /* Type toggle pill */
+        .type-toggle {
+            display: flex;
+            gap: 0;
+            margin-bottom: var(--space-3);
+        }
+
+        .type-toggle button {
+            flex: 1;
+            padding: var(--space-2);
+            border: 1px solid var(--border);
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            font-weight: 700;
+            font-size: var(--text-sm);
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--ease-out);
+        }
+
+        .type-toggle button:first-child {
+            border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+        }
+
+        .type-toggle button:last-child {
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+
+        .type-toggle button.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg);
+        }
+
+        .day-col {
+            position: relative;
+            border-right: 1px solid var(--border-subtle);
+            min-height: 100%;
+        }
+
+        .color-row {
+            display: flex;
+            gap: var(--space-1);
+            flex-wrap: wrap;
+        }
+
+        .color-swatch {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: transform var(--duration-fast) var(--ease-out);
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+
+        .color-swatch.selected {
+            border-color: var(--text-primary);
+            box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 4px var(--accent);
+        }
+
+        .check-row {
+            display: flex;
+            align-items: center;
+            gap: var(--space-1);
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .check-row input {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+        }
+
+        /* FAB and Modal styles provided by theme.css */
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-2);
+        }
+
+        @media (max-width: 960px) {
+            .overview-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .panel {
+                max-height: none;
+                min-height: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 0 var(--space-2);
+            }
+
+            .nav-container {
+                height: auto;
+                min-height: 60px;
+                flex-wrap: wrap;
+                padding: 10px 0;
+            }
+
+            .nav-links {
+                order: 3;
+                width: 100%;
+                justify-content: flex-start;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                padding-bottom: 4px;
+            }
+
+            main {
+                padding: var(--space-2) var(--space-2) var(--space-7);
+            }
+
+            h1 {
+                font-size: var(--text-2xl);
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-overlay {
+                align-items: flex-end;
+            }
+
+            .modal {
+                max-width: 100%;
+                width: 100%;
+                border-radius: 24px 24px 0 0;
+                transform: translateY(100%) scale(1);
+                max-height: 90vh;
+                border-bottom: none;
+            }
+
+            .modal-overlay.active .modal {
+                transform: translateY(0) scale(1);
+            }
+
+            .user-name {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Multi<span>Tracker</span></div>
+            <div class="nav-links">
+                <a href="tasks.html">Tasks</a>
+                <a href="schedule.html" class="active">Schedule</a>
+                <a href="notes.html">Notes</a>
+                <a href="savings.html">Savings</a>
+                <a href="profile.html">Profile</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <h1>Weekly Schedule</h1>
+        <p class="page-sub">Recurring classes · click a day header to set Active Day · click empty slots to add</p>
+
+        <div class="timetable-wrap">
+            <div class="timetable-scroll">
+                <div class="timetable" id="timetable"></div>
+            </div>
+        </div>
+
+        <div class="overview-header">
+            <h2>Daily Overview</h2>
+            <span class="active-label" id="activeDayLabel">Today</span>
+        </div>
+
+        <div class="overview-grid">
+            <section class="panel">
+                <div class="panel-head">
+                    <h3>Today's Events</h3>
+                    <button class="panel-add" onclick="openEventModal()" title="Add event">+</button>
+                </div>
+                <div class="panel-body" id="eventsList"></div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-head">
+                    <h3>Deadlines</h3>
+                    <a href="tasks.html" style="font-size:var(--text-xs);font-weight:600;color:var(--accent);text-decoration:none;">All tasks →</a>
+                </div>
+                <div class="panel-body" id="deadlinesList"></div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-head">
+                    <h3>Master To-Do</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="todo-add-row">
+                        <input type="text" id="todoInput" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addTodoQuick()">
+                        <button onclick="addTodoQuick()">Add</button>
+                    </div>
+                    <div id="todosList"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <button class="add-btn" onclick="openSlotModal()" title="Add class">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+    </button>
+
+    <!-- Class Slot Modal -->
+    <div class="modal-overlay" id="slotModal" onclick="if(event.target===this) closeSlotModal()">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="slotModalTitle">Add Class</h2>
+                <button class="modal-close" onclick="closeSlotModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="type-toggle" id="sTypeToggleContainer">
+                    <button type="button" id="ttClass" class="active" onclick="setEntryType('class')">Class Slot</button>
+                    <button type="button" id="ttEvent" onclick="setEntryType('event')">One-off Event</button>
+                </div>
+                <div class="form-group class-only-field">
+                    <label>Class Name *</label>
+                    <input type="text" id="sClassName" placeholder="e.g. Calculus II">
+                </div>
+                <div class="form-group event-only-field" style="display:none;">
+                    <label>Event Title *</label>
+                    <input type="text" id="sEventTitle" placeholder="e.g. Study group">
+                </div>
+                <div class="form-row class-only-field">
+                    <div class="form-group">
+                        <label>Course Code</label>
+                        <input type="text" id="sCourseCode" placeholder="MATH 201">
+                    </div>
+                    <div class="form-group">
+                        <label>Room / Location</label>
+                        <input type="text" id="sRoom" placeholder="Bldg A · 204">
+                    </div>
+                </div>
+                <div class="form-group event-only-field" style="display:none;">
+                    <label>Location</label>
+                    <input type="text" id="sEventLocation" placeholder="e.g. Library Room 3">
+                </div>
+                <div class="form-group class-only-field">
+                    <label>Instructor</label>
+                    <input type="text" id="sInstructor" placeholder="Dr. Santos">
+                </div>
+                <div class="form-group event-only-field" style="display:none;">
+                    <label>Notes</label>
+                    <textarea id="sEventNotes" placeholder="Optional notes"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Day *</label>
+                        <select id="sDay">
+                            <option value="1">Monday</option>
+                            <option value="2">Tuesday</option>
+                            <option value="3">Wednesday</option>
+                            <option value="4">Thursday</option>
+                            <option value="5">Friday</option>
+                            <option value="6">Saturday</option>
+                            <option value="0">Sunday</option>
+                        </select>
+                    </div>
+                    <div class="form-group class-only-field">
+                        <label>&nbsp;</label>
+                        <label class="check-row"><input type="checkbox" id="sIsBreak"> Lunch / Break</label>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Start *</label>
+                        <input type="time" id="sStart" value="09:00">
+                    </div>
+                    <div class="form-group">
+                        <label id="sEndLabel">End *</label>
+                        <input type="time" id="sEnd" value="10:00">
+                    </div>
+                </div>
+                <div class="form-group class-only-field">
+                    <label>Color</label>
+                    <div class="color-row" id="colorRow"></div>
+                    <input type="hidden" id="sColor" value="#F5C518">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-delete" id="slotDeleteBtn" style="display:none;" onclick="deleteSlot()">Delete</button>
+                <button class="btn-secondary" onclick="closeSlotModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveSlot()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Modal -->
+    <div class="modal-overlay" id="eventModal" onclick="if(event.target===this) closeEventModal()">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="eventModalTitle">Add Event</h2>
+                <button class="modal-close" onclick="closeEventModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" id="eTitle" placeholder="e.g. Study group">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date *</label>
+                        <input type="date" id="eDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Time</label>
+                        <input type="time" id="eTime">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>End Time</label>
+                        <input type="time" id="eEndTime">
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" id="eLocation" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="eNotes" placeholder="Optional notes"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-delete" id="eventDeleteBtn" style="display:none;" onclick="deleteEventItem()">Delete</button>
+                <button class="btn-secondary" onclick="closeEventModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveEvent()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './src/supabaseClient.js'
+        import { requireAuth } from './src/auth.js'
+        import { fetchClassSlots, createClassSlot, updateClassSlot, deleteClassSlot } from './src/schedule.js'
+        import { fetchEvents, createEvent, updateEvent, deleteEvent } from './src/events.js'
+        import { fetchTodos, createTodo, toggleTodo, deleteTodo } from './src/todos.js'
+        import { fetchTasks } from './src/tasks.js'
+
+        const COLORS = ['#F5C518', '#EAB308', '#3B82F6', '#22C55E', '#F59E0B', '#EF4444']
+        const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+        const DAY_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+        // Display order Mon→Sun
+        const DISPLAY_DAYS = [1, 2, 3, 4, 5, 6, 0]
+
+        const GRID_START = 7   // 07:00
+        const GRID_END = 20    // 20:00
+        const HOUR_H = 48      // px per hour
+
+        let classSlots = []
+        let events = []
+        let todos = []
+        let tasks = []
+        let activeDay = new Date()
+        let editingSlotId = null
+        let editingEventId = null
+
+        window.logout = async () => {
+            await supabase.auth.signOut()
+            window.location.href = '/signin.html'
+        }
+
+        function toISODate(d) {
+            const y = d.getFullYear()
+            const m = String(d.getMonth() + 1).padStart(2, '0')
+            const day = String(d.getDate()).padStart(2, '0')
+            return `${y}-${m}-${day}`
+        }
+
+        function parseTimeToMinutes(t) {
+            if (!t) return 0
+            const parts = String(t).slice(0, 5).split(':')
+            return parseInt(parts[0], 10) * 60 + parseInt(parts[1] || '0', 10)
+        }
+
+        function formatTime(t) {
+            if (!t) return ''
+            return String(t).slice(0, 5)
+        }
+
+        function dateForWeekday(targetDow) {
+            // Map activeDay's week to the target weekday (keep same calendar week as activeDay)
+            const d = new Date(activeDay)
+            const current = d.getDay()
+            const diff = targetDow - current
+            d.setDate(d.getDate() + diff)
+            return d
+        }
+
+        // ── Active day ────────────────────────────────
+        function scrollActiveDayIntoView() {
+            const scrollContainer = document.querySelector('.timetable-scroll')
+            if (!scrollContainer) return
+            const activeCol = scrollContainer.querySelector(`.day-col[data-dow="${activeDay.getDay()}"]`)
+            if (activeCol) {
+                const colWidth = activeCol.offsetWidth
+                const containerWidth = scrollContainer.offsetWidth
+                const leftOffset = activeCol.offsetLeft
+                scrollContainer.scrollTo({
+                    left: leftOffset - (containerWidth / 2) + (colWidth / 2),
+                    behavior: 'smooth'
+                })
+            }
+        }
+
+        function setActiveDayFromDow(dow) {
+            activeDay = dateForWeekday(dow)
+            renderAll()
+            setTimeout(scrollActiveDayIntoView, 50)
+        }
+
+        function setActiveDayLabel() {
+            const today = new Date(); today.setHours(0,0,0,0)
+            const a = new Date(activeDay); a.setHours(0,0,0,0)
+            const same = a.getTime() === today.getTime()
+            const el = document.getElementById('activeDayLabel')
+            el.textContent = same
+                ? `Today · ${DAY_FULL[a.getDay()]} ${a.getDate()}`
+                : `${DAY_FULL[a.getDay()]} ${a.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`
+        }
+
+        // ── Timetable ─────────────────────────────────
+        function renderTimetable() {
+            const root = document.getElementById('timetable')
+            const hours = []
+            for (let h = GRID_START; h < GRID_END; h++) hours.push(h)
+            const totalH = hours.length * HOUR_H
+            const activeDow = activeDay.getDay()
+
+            let html = `<div class="tt-corner"></div>`
+            for (const dow of DISPLAY_DAYS) {
+                const cls = dow === activeDow ? 'tt-day active' : 'tt-day'
+                html += `<div class="${cls}" data-dow="${dow}" onclick="pickDay(${dow})">
+                    <span class="dow">${DAY_NAMES[dow]}</span>
+                    <span class="dlabel">${dateForWeekday(dow).getDate()}</span>
+                </div>`
+            }
+
+            // time gutter + 7 day columns as a subgrid using absolute day columns
+            html += `<div style="grid-column:1/-1;display:grid;grid-template-columns:64px repeat(7,minmax(110px,1fr));position:relative;height:${totalH}px;">`
+
+            // time labels
+            html += `<div style="position:relative;">`
+            hours.forEach((h, i) => {
+                const label = `${String(h).padStart(2, '0')}:00`
+                html += `<div class="tt-time" style="position:absolute;top:${i * HOUR_H}px;left:0;right:0;height:${HOUR_H}px;">${label}</div>`
+            })
+            html += `</div>`
+
+            // day columns
+            DISPLAY_DAYS.forEach((dow, colIdx) => {
+                const isActive = dow === activeDow
+                html += `<div class="day-col" style="position:relative;height:${totalH}px;" data-dow="${dow}">`
+                hours.forEach((h, i) => {
+                    const isLunch = h >= 12 && h < 13
+                    const cellCls = [
+                        'tt-cell',
+                        isActive ? 'active-col' : '',
+                        isLunch ? 'lunch-band' : ''
+                    ].filter(Boolean).join(' ')
+                    const start = `${String(h).padStart(2, '0')}:00`
+                    html += `<div class="${cellCls}" style="position:absolute;top:${i * HOUR_H}px;left:0;right:0;height:${HOUR_H}px;"
+                        onclick="openSlotModal({day:${dow},start:'${start}'})"></div>`
+                })
+
+                // slots for this day
+                const daySlots = classSlots.filter(s => s.dayOfWeek === dow)
+                for (const slot of daySlots) {
+                    const startM = parseTimeToMinutes(slot.startTime)
+                    const endM = parseTimeToMinutes(slot.endTime)
+                    const top = ((startM - GRID_START * 60) / 60) * HOUR_H
+                    const height = Math.max(((endM - startM) / 60) * HOUR_H - 2, 22)
+                    if (top + height < 0 || top > totalH) continue
+                    const safeName = escapeHtml(slot.className)
+                    const meta = [formatTime(slot.startTime) + '–' + formatTime(slot.endTime), slot.room].filter(Boolean).join(' · ')
+                    const brk = slot.isBreak ? ' break-slot' : ''
+                    html += `<div class="slot-card${brk}" style="top:${Math.max(top, 0)}px;height:${height}px;background:${slot.color};"
+                        onclick="event.stopPropagation();openSlotModal({id:'${slot.id}'})">
+                        <div class="sc-name">${safeName}</div>
+                        <div class="sc-meta">${escapeHtml(meta)}</div>
+                    </div>`
+                }
+
+                // events for this day
+                const dayDate = toISODate(dateForWeekday(dow))
+                const dayEvents = events.filter(e => e.eventDate === dayDate && e.eventTime)
+                for (const ev of dayEvents) {
+                    const startM = parseTimeToMinutes(ev.eventTime)
+                    const endM = ev.endTime ? parseTimeToMinutes(ev.endTime) : startM + 60
+                    const top = ((startM - GRID_START * 60) / 60) * HOUR_H
+                    const height = Math.max(((endM - startM) / 60) * HOUR_H - 2, 24)
+                    if (top + height < 0 || top > totalH) continue
+                    const safeTitle = escapeHtml(ev.title)
+                    const meta = [
+                        formatTime(ev.eventTime),
+                        ev.endTime ? '–' + formatTime(ev.endTime) : '',
+                        ev.location ? ' · ' + escapeHtml(ev.location) : ''
+                    ].filter(Boolean).join('')
+                    html += `<div class="slot-card event-slot" style="top:${Math.max(top, 0)}px;height:${height}px;"
+                        onclick="event.stopPropagation();openEventModal('${ev.id}')">
+                        <div class="sc-name">${safeTitle}</div>
+                        <div class="sc-meta">${escapeHtml(meta)}</div>
+                    </div>`
+                }
+
+                html += `</div>`
+            })
+
+            html += `</div>`
+            root.innerHTML = html
+        }
+
+        window.pickDay = (dow) => setActiveDayFromDow(dow)
+
+        // ── Overview panels ───────────────────────────
+        function renderEvents() {
+            const iso = toISODate(activeDay)
+            const list = events.filter(e => e.eventDate === iso)
+                .sort((a, b) => parseTimeToMinutes(a.eventTime) - parseTimeToMinutes(b.eventTime))
+            const el = document.getElementById('eventsList')
+            if (!list.length) {
+                el.innerHTML = `<div class="empty-mini">No events for this day</div>`
+                return
+            }
+            el.innerHTML = list.map(e => `
+                <div class="event-item" onclick="openEventModal('${e.id}')">
+                    <div class="ei-title">${escapeHtml(e.title)}</div>
+                    <div class="ei-meta">
+                        ${e.eventTime ? `<span>Time ${formatTime(e.eventTime)}${e.endTime ? ' – ' + formatTime(e.endTime) : ''}</span>` : ''}
+                        ${e.location ? `<span>Place ${escapeHtml(e.location)}</span>` : ''}
+                    </div>
+                </div>
+            `).join('')
+        }
+
+        function renderDeadlines() {
+            const iso = toISODate(activeDay)
+            const list = tasks.filter(t => t.dueDate === iso)
+            const el = document.getElementById('deadlinesList')
+            if (!list.length) {
+                el.innerHTML = `<div class="empty-mini">No deadlines due this day</div>`
+                return
+            }
+            el.innerHTML = list.map(t => {
+                const overdue = t.status === 'overdue'
+                return `
+                <div class="deadline-item priority-${t.priority}${overdue ? ' overdue-item' : ''}">
+                    <div class="di-title">${escapeHtml(t.title)}</div>
+                    <div class="di-row">
+                        <span class="badge subject-chip">${escapeHtml(t.subject)}</span>
+                        <span class="badge priority-${t.priority}">${t.priority}</span>
+                        <span class="badge status-${t.status}">${t.status.replace('_', ' ')}</span>
+                    </div>
+                    <a href="tasks.html">Open in Tasks</a>
+                </div>`
+            }).join('')
+        }
+
+        function renderTodos() {
+            const el = document.getElementById('todosList')
+            if (!todos.length) {
+                el.innerHTML = `<div class="empty-mini">Nothing on the master list</div>`
+                return
+            }
+            el.innerHTML = todos.map(t => `
+                <div class="todo-item${t.isCompleted ? ' done' : ''}">
+                    <input type="checkbox" ${t.isCompleted ? 'checked' : ''} onchange="toggleTodoItem('${t.id}', this.checked)">
+                    <span class="todo-title" onclick="/* reserved */">${escapeHtml(t.title)}</span>
+                    <button class="todo-del" onclick="removeTodo('${t.id}')" title="Delete">×</button>
+                </div>
+            `).join('')
+        }
+
+        function renderAll() {
+            setActiveDayLabel()
+            renderTimetable()
+            renderEvents()
+            renderDeadlines()
+            renderTodos()
+        }
+
+        // ── Slot modal ────────────────────────────────
+        function buildColorRow(selected) {
+            const row = document.getElementById('colorRow')
+            row.innerHTML = COLORS.map(c =>
+                `<div class="color-swatch${c === selected ? ' selected' : ''}" style="background:${c}" onclick="pickColor('${c}')"></div>`
+            ).join('')
+        }
+
+        window.pickColor = (c) => {
+            document.getElementById('sColor').value = c
+            buildColorRow(c)
+        }
+
+        window.setEntryType = (type) => {
+            const isEvent = type === 'event'
+            document.getElementById('ttClass').classList.toggle('active', !isEvent)
+            document.getElementById('ttEvent').classList.toggle('active', isEvent)
+            document.querySelectorAll('.class-only-field').forEach(el => {
+                el.style.display = isEvent ? 'none' : ''
+            })
+            document.querySelectorAll('.event-only-field').forEach(el => {
+                el.style.display = isEvent ? '' : 'none'
+            })
+            document.getElementById('sEndLabel').textContent = isEvent ? 'End' : 'End *'
+            if (!editingSlotId) {
+                document.getElementById('slotModalTitle').textContent = isEvent ? 'Add Event' : 'Add Class'
+            }
+        }
+
+        window.openSlotModal = (opts = {}) => {
+            editingSlotId = opts.id || null
+            document.getElementById('slotDeleteBtn').style.display = editingSlotId ? 'block' : 'none'
+            const toggle = document.getElementById('sTypeToggleContainer')
+
+            if (editingSlotId) {
+                // Editing a class — force Class mode, hide type toggle
+                toggle.style.display = 'none'
+                setEntryType('class')
+                document.getElementById('slotModalTitle').textContent = 'Edit Class'
+                const s = classSlots.find(x => x.id === editingSlotId)
+                if (!s) return
+                document.getElementById('sClassName').value = s.className
+                document.getElementById('sCourseCode').value = s.courseCode
+                document.getElementById('sRoom').value = s.room
+                document.getElementById('sInstructor').value = s.instructor
+                document.getElementById('sDay').value = String(s.dayOfWeek)
+                document.getElementById('sStart').value = formatTime(s.startTime)
+                document.getElementById('sEnd').value = formatTime(s.endTime)
+                document.getElementById('sIsBreak').checked = s.isBreak
+                document.getElementById('sColor').value = s.color
+                buildColorRow(s.color)
+            } else {
+                // Creating new — show type toggle, default Class
+                toggle.style.display = ''
+                setEntryType('class')
+                document.getElementById('slotModalTitle').textContent = 'Add Class'
+                document.getElementById('sClassName').value = ''
+                document.getElementById('sCourseCode').value = ''
+                document.getElementById('sRoom').value = ''
+                document.getElementById('sInstructor').value = ''
+                document.getElementById('sEventTitle').value = ''
+                document.getElementById('sEventLocation').value = ''
+                document.getElementById('sEventNotes').value = ''
+                document.getElementById('sDay').value = String(opts.day ?? activeDay.getDay())
+                document.getElementById('sStart').value = opts.start || '09:00'
+                document.getElementById('sEnd').value = opts.start
+                    ? (() => { const m = parseTimeToMinutes(opts.start) + 60; return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}` })()
+                    : '10:00'
+                document.getElementById('sIsBreak').checked = false
+                document.getElementById('sColor').value = '#F5C518'
+                buildColorRow('#F5C518')
+            }
+            document.getElementById('slotModal').classList.add('active')
+        }
+
+        window.closeSlotModal = () => {
+            document.getElementById('slotModal').classList.remove('active')
+            editingSlotId = null
+        }
+
+        window.saveSlot = async () => {
+            const isEvent = document.getElementById('ttEvent').classList.contains('active')
+            const startTime = document.getElementById('sStart').value
+            const endTime = document.getElementById('sEnd').value
+
+            if (isEvent && !editingSlotId) {
+                // Create temporary daily_event for the selected weekday in active week
+                const title = document.getElementById('sEventTitle').value.trim()
+                const dayOfWeek = parseInt(document.getElementById('sDay').value, 10)
+                const eventDate = toISODate(dateForWeekday(dayOfWeek))
+                if (!title) { alert('Event title required.'); return }
+                if (startTime && endTime && parseTimeToMinutes(endTime) <= parseTimeToMinutes(startTime)) {
+                    alert('End must be after start.')
+                    return
+                }
+                // End without start is not a valid range — drop end
+                const endVal = (startTime && endTime) ? endTime : null
+                const res = await createEvent({
+                    title,
+                    eventDate,
+                    eventTime: startTime || null,
+                    endTime: endVal,
+                    location: document.getElementById('sEventLocation').value.trim(),
+                    notes: document.getElementById('sEventNotes').value.trim()
+                })
+                if (!res.success) { alert(res.error || 'Save failed'); return }
+                events = await fetchEvents()
+                closeSlotModal()
+                renderAll()
+                return
+            }
+
+            // Class path (create or edit)
+            const className = document.getElementById('sClassName').value.trim()
+            if (!className || !startTime || !endTime) { alert('Class name, start, and end required.'); return }
+            if (parseTimeToMinutes(endTime) <= parseTimeToMinutes(startTime)) { alert('End must be after start.'); return }
+
+            const payload = {
+                className,
+                courseCode: document.getElementById('sCourseCode').value.trim(),
+                room: document.getElementById('sRoom').value.trim(),
+                instructor: document.getElementById('sInstructor').value.trim(),
+                dayOfWeek: parseInt(document.getElementById('sDay').value, 10),
+                startTime,
+                endTime,
+                color: document.getElementById('sColor').value,
+                isBreak: document.getElementById('sIsBreak').checked
+            }
+
+            let res
+            if (editingSlotId) res = await updateClassSlot(editingSlotId, payload)
+            else res = await createClassSlot(payload)
+
+            if (!res.success) { alert(res.error || 'Save failed'); return }
+            classSlots = await fetchClassSlots()
+            closeSlotModal()
+            renderAll()
+        }
+
+        window.deleteSlot = async () => {
+            if (!editingSlotId) return
+            if (!confirm('Delete this class?')) return
+            const res = await deleteClassSlot(editingSlotId)
+            if (!res.success) { alert(res.error || 'Delete failed'); return }
+            classSlots = classSlots.filter(s => s.id !== editingSlotId)
+            closeSlotModal()
+            renderAll()
+        }
+
+        // ── Event modal ───────────────────────────────
+        window.openEventModal = (id) => {
+            editingEventId = typeof id === 'string' ? id : null
+            document.getElementById('eventModalTitle').textContent = editingEventId ? 'Edit Event' : 'Add Event'
+            document.getElementById('eventDeleteBtn').style.display = editingEventId ? 'block' : 'none'
+
+            if (editingEventId) {
+                const e = events.find(x => x.id === editingEventId)
+                if (!e) return
+                document.getElementById('eTitle').value = e.title
+                document.getElementById('eDate').value = e.eventDate
+                document.getElementById('eTime').value = formatTime(e.eventTime)
+                document.getElementById('eEndTime').value = formatTime(e.endTime)
+                document.getElementById('eLocation').value = e.location
+                document.getElementById('eNotes').value = e.notes
+            } else {
+                document.getElementById('eTitle').value = ''
+                document.getElementById('eDate').value = toISODate(activeDay)
+                document.getElementById('eTime').value = ''
+                document.getElementById('eEndTime').value = ''
+                document.getElementById('eLocation').value = ''
+                document.getElementById('eNotes').value = ''
+            }
+            document.getElementById('eventModal').classList.add('active')
+        }
+
+        window.closeEventModal = () => {
+            document.getElementById('eventModal').classList.remove('active')
+            editingEventId = null
+        }
+
+        window.saveEvent = async () => {
+            const title = document.getElementById('eTitle').value.trim()
+            const eventDate = document.getElementById('eDate').value
+            if (!title || !eventDate) { alert('Title and date required.'); return }
+
+            const eventTime = document.getElementById('eTime').value || null
+            const endTimeRaw = document.getElementById('eEndTime').value || null
+            if (eventTime && endTimeRaw && parseTimeToMinutes(endTimeRaw) <= parseTimeToMinutes(eventTime)) {
+                alert('End time must be after start time.')
+                return
+            }
+            // End without start is not a valid range — drop end
+            const endTime = (eventTime && endTimeRaw) ? endTimeRaw : null
+
+            const payload = {
+                title,
+                eventDate,
+                eventTime,
+                endTime,
+                location: document.getElementById('eLocation').value.trim(),
+                notes: document.getElementById('eNotes').value.trim()
+            }
+
+            let res
+            if (editingEventId) res = await updateEvent(editingEventId, payload)
+            else res = await createEvent(payload)
+
+            if (!res.success) { alert(res.error || 'Save failed'); return }
+            events = await fetchEvents()
+            closeEventModal()
+            renderAll()
+        }
+
+        window.deleteEventItem = async () => {
+            if (!editingEventId) return
+            if (!confirm('Delete this event?')) return
+            const res = await deleteEvent(editingEventId)
+            if (!res.success) { alert(res.error || 'Delete failed'); return }
+            events = events.filter(e => e.id !== editingEventId)
+            closeEventModal()
+            renderAll()
+        }
+
+        // ── Todos ─────────────────────────────────────
+        window.addTodoQuick = async () => {
+            const input = document.getElementById('todoInput')
+            const title = input.value.trim()
+            if (!title) return
+            const res = await createTodo({ title })
+            if (!res.success) { alert(res.error || 'Failed'); return }
+            input.value = ''
+            todos = await fetchTodos()
+            renderTodos()
+        }
+
+        window.toggleTodoItem = async (id, checked) => {
+            const res = await toggleTodo(id, checked)
+            if (!res.success) { alert(res.error || 'Failed'); return }
+            todos = await fetchTodos()
+            renderTodos()
+        }
+
+        window.removeTodo = async (id) => {
+            if (!id) return
+            if (!confirm('Delete this to-do?')) return
+            const res = await deleteTodo(id)
+            if (!res.success) { alert(res.error || 'Failed'); return }
+            todos = todos.filter(t => t.id !== id)
+            renderTodos()
+        }
+
+        // note: todo row × kept (no modal); task/class/event use modal Delete only
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+        }
+
+        // ── Boot ──────────────────────────────────────
+        async function init() {
+            const user = await requireAuth()
+            if (!user) return
+
+            const { data: profile } = await supabase
+                .from('user_profile').select('username').eq('id', user.id).single()
+                profile?.username || user.email?.split('@')[0] || 'User'
+
+            buildColorRow('#F5C518')
+
+            const [slots, evs, tds, tks] = await Promise.all([
+                fetchClassSlots(),
+                fetchEvents(),
+                fetchTodos(),
+                fetchTasks()
+            ])
+            classSlots = slots
+            events = evs
+            todos = tds
+            tasks = tks
+            renderAll()
+            setTimeout(scrollActiveDayIntoView, 150)
+        }
+
+        init()
+    </script>
+</body>
+</html>

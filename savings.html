@@ -3,191 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cards - SavingsTracker</title>
+    <title>Savings - MultiTracker</title>
+    <link rel="stylesheet" href="/src/theme.css">
+    <link rel="stylesheet" href="/src/nav.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #faf8ff;
-            background-image:
-                radial-gradient(rgba(139, 92, 246, 0.15) 1.5px, transparent 1.5px),
-                radial-gradient(rgba(236, 72, 153, 0.1) 1.5px, transparent 1.5px),
-                linear-gradient(135deg, #faf8ff 0%, #f3e8ff 50%, #fae8ff 100%);
-            background-size: 40px 40px, 40px 40px, 100% 100%;
-            background-position: 0 0, 20px 20px, 0 0;
-            background-attachment: fixed;
-            min-height: 100vh;
-        }
-
-        
-        nav {
-            background: white;
-            box-shadow: 0 2px 12px rgba(139, 92, 246, 0.04);
-            padding: 0 40px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid rgba(139, 92, 246, 0.08);
-        }
-
-        .nav-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            max-width: 1200px;
-            margin: 0 auto;
-            height: 70px;
-        }
-
-        .logo {
-            font-size: 22px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #8b5cf6, #ec4899);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .nav-links a {
-            padding: 9px 18px;
-            text-decoration: none;
-            color: #6b7280;
-            font-weight: 500;
-            border-radius: 8px;
-            transition: all 0.2s;
-            font-size: 15px;
-        }
-
-        .nav-links a:hover {
-            background: #f3f4f6;
-            color: #1e1b4b;
-        }
-
-        .nav-links a.active {
-            background: linear-gradient(135deg, #8b5cf6, #ec4899);
-            color: white;
-        }
-
-        .logout-btn {
-            padding: 9px 18px;
-            background: transparent;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            color: #6b7280;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-
-        .logout-btn:hover {
-            background: #fef2f2;
-            border-color: #fca5a5;
-            color: #dc2626;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .user-name {
-            color: #4b5563;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        
-        main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 36px 40px;
-            padding-bottom: 120px;
-        }
-
-        h1 {
-            color: #1e1b4b;
-            font-size: 28px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            margin-bottom: 32px;
-        }
+        /* ─────────────────────────────────────────────────────────────
+           PAGE-SPECIFIC STYLES
+           ───────────────────────────────────────────────────────────── */
 
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
+            gap: var(--space-3);
         }
 
-        
-        .savings-card {
-            background: white;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.04), 0 1px 3px rgba(139, 92, 246, 0.05);
-            border: 1px solid rgba(139, 92, 246, 0.08);
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            animation: cardPop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes cardPop {
-            from { opacity: 0; transform: translateY(16px) scale(0.97); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .savings-card:hover {
-            transform: translateY(-8px) scale(1.01);
-            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.12);
-            border-color: rgba(139, 92, 246, 0.2);
-        }
-
+        /* Card Image Area */
         .card-image {
             width: 100%;
-            height: 130px;
-            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
-            
-            background-image:
-                radial-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px),
-                linear-gradient(135deg, #ede9fe 0%, #fae8ff 100%);
-            background-size: 16px 16px, 100% 100%;
+            height: 120px;
+            background: var(--bg-elevated);
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            border-bottom: 1px solid rgba(139, 92, 246, 0.06);
+            border-bottom: 1px solid var(--border);
         }
 
         .card-emoji-badge {
-            width: 72px;
-            height: 72px;
-            background: white;
-            border-radius: 20px;
+            width: 64px;
+            height: 64px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 36px;
-            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.1);
-            border: 1px solid rgba(139, 92, 246, 0.08);
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            font-size: 28px;
+            transition: transform var(--duration-normal) var(--ease-out-expo);
         }
 
         .savings-card:hover .card-emoji-badge {
-            transform: scale(1.1) rotate(5deg);
-            box-shadow: 0 12px 24px rgba(139, 92, 246, 0.18);
+            transform: scale(1.05);
         }
 
         .card-settings {
@@ -196,572 +52,292 @@
             right: 12px;
             width: 32px;
             height: 32px;
-            background: white;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all var(--duration-fast) var(--ease-out);
             z-index: 10;
-            border: 1px solid rgba(139, 92, 246, 0.08);
         }
 
         .card-settings:hover {
-            transform: rotate(45deg) scale(1.05);
-            box-shadow: 0 6px 14px rgba(139, 92, 246, 0.15);
+            background: var(--accent-muted);
+            border-color: var(--accent);
+            transform: rotate(45deg);
         }
 
         .card-settings svg {
-            width: 16px;
-            height: 16px;
-            fill: #7c3aed;
+            width: 14px;
+            height: 14px;
+            fill: var(--accent);
         }
 
+        /* Card Body */
         .card-body {
-            padding: 24px;
+            padding: var(--space-3);
             display: flex;
             flex-direction: column;
             flex-grow: 1;
         }
 
         .card-title {
-            font-size: 18px;
+            font-size: var(--text-lg);
             font-weight: 700;
-            color: #1e1b4b;
-            margin-bottom: 6px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
         }
 
         .card-description {
-            font-size: 14px;
-            color: #6b7280;
-            margin-bottom: 20px;
-            line-height: 1.5;
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-3);
+            line-height: var(--leading-relaxed);
             flex-grow: 1;
         }
 
+        /* Progress */
         .progress-container {
-            margin-bottom: 16px;
+            margin-bottom: var(--space-2);
         }
 
         .progress-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 14px;
+            margin-bottom: var(--space-1);
+            font-size: var(--text-sm);
         }
 
         .progress-amount {
-            font-weight: 700;
-            color: #1e1b4b;
+            font-weight: 600;
+            color: var(--text-primary);
         }
 
         .progress-percent {
-            color: #8b5cf6;
+            color: var(--accent);
             font-weight: 700;
         }
 
-        .progress-bar {
-            height: 8px;
-            background: #ede9fe;
-            border-radius: 99px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-            border-radius: 99px;
-            transform-origin: left;
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
+        /* Deadline Badge */
         .deadline-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-size: 12px;
-            color: #6b7280;
-            margin-bottom: 16px;
-            background: #f5f3ff;
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            margin-bottom: var(--space-2);
+            background: var(--bg-elevated);
             padding: 4px 10px;
-            border-radius: 99px;
-            font-weight: 500;
+            border-radius: var(--radius-full);
+            font-weight: 600;
             align-self: flex-start;
+            border: 1px solid var(--border);
         }
 
         .deadline-badge.overdue {
-            background: #fee2e2;
-            color: #ef4444;
+            background: var(--error-bg);
+            color: var(--error);
+            border-color: var(--error-border);
         }
 
+        /* Card Actions */
         .card-actions {
             display: flex;
-            gap: 10px;
+            gap: var(--space-2);
             margin-top: auto;
         }
 
-        .btn {
+        .btn-withdraw {
             flex: 1;
             padding: 11px 16px;
-            border-radius: 10px;
-            font-size: 14px;
+            border-radius: var(--radius-md);
+            font-size: var(--text-sm);
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            border: none;
-        }
-
-        .btn-deposit {
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
-        }
-
-        .btn-deposit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(139, 92, 246, 0.35);
-        }
-
-        .btn-deposit:active {
-            transform: translateY(0);
-        }
-
-        .btn-withdraw {
-            background: #faf8ff;
-            color: #7c3aed;
-            border: 2px solid #eef2f6;
+            transition: all var(--duration-fast) var(--ease-out);
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
         }
 
         .btn-withdraw:hover {
-            background: #f5f3ff;
-            border-color: #ddd6fe;
+            background: var(--bg-hover);
+            border-color: var(--border-strong);
         }
 
-        
-        .add-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.35);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            border: none;
-            z-index: 90;
-        }
-
-        .add-btn:hover {
-            transform: scale(1.1) rotate(90deg);
-            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.45);
-        }
-
-        .add-btn svg {
-            width: 28px;
-            height: 28px;
-            fill: white;
-        }
-
-        
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(30, 27, 75, 0.3);
-            backdrop-filter: blur(8px);
-            z-index: 200;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-            opacity: 1;
-        }
-
-        .modal {
-            background: white;
-            border-radius: 24px;
-            width: 90%;
-            max-width: 460px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 30px 60px rgba(30, 27, 75, 0.15);
-            border: 1px solid rgba(139, 92, 246, 0.1);
-            transform: translateY(20px) scale(0.95);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .modal-overlay.active .modal {
-            transform: translateY(0) scale(1);
-        }
-
-        .modal-header {
-            padding: 24px 28px;
-            border-bottom: 1px solid #f3f4f6;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h2 {
-            font-size: 20px;
-            color: #1e1b4b;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-
-        .modal-close {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: none;
-            background: #faf8ff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: #6b7280;
-            transition: all 0.2s;
-        }
-
-        .modal-close:hover {
-            background: #fee2e2;
-            color: #ef4444;
-        }
-
-        .modal-body {
-            padding: 28px;
-        }
-
-        .form-group {
-            margin-bottom: 22px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #1e1b4b;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #eef2f6;
-            border-radius: 10px;
-            font-size: 15px;
-            color: #1e1b4b;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            background: #fafafa;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #8b5cf6;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .image-picker {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .image-option {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            background: #faf8ff;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .image-option:hover {
-            background: #ede9fe;
-        }
-
-        .image-option.selected {
-            border-color: #8b5cf6;
-            background: #f5f3ff;
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
-        }
-
-        .modal-footer {
-            padding: 20px 28px;
-            border-top: 1px solid #f3f4f6;
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-        }
-
-        .btn-cancel {
-            padding: 12px 24px;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            background: #faf8ff;
-            color: #6b7280;
-            border: 2px solid #eef2f6;
-            transition: all 0.2s;
-        }
-
-        .btn-cancel:hover {
-            background: #f3f4f6;
-        }
-
-        .btn-create {
-            padding: 12px 24px;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            color: white;
-            border: none;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .btn-create:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(139, 92, 246, 0.3);
-        }
-
-        
+        /* Daily Savings */
         .daily-savings {
-            background: #f5f3ff;
-            padding: 20px;
-            border-radius: 16px;
-            margin-bottom: 24px;
+            background: var(--bg-elevated);
+            padding: var(--space-3);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-3);
             text-align: center;
-            border: 1px solid rgba(139, 92, 246, 0.1);
+            border: 1px solid var(--border);
         }
 
         .daily-savings-label {
-            font-size: 13px;
-            color: #6b7280;
-            margin-bottom: 6px;
-            font-weight: 600;
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: var(--tracking-eyebrow);
         }
 
         .daily-savings-value {
-            font-size: 28px;
+            font-size: var(--text-2xl);
             font-weight: 800;
-            color: #7c3aed;
+            color: var(--accent);
         }
 
+        /* Deposit Options */
         .deposit-options {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: var(--space-2);
+            margin-bottom: var(--space-3);
         }
 
         .deposit-option {
             flex: 1;
-            padding: 14px 10px;
-            border: 2px solid #eef2f6;
-            border-radius: 12px;
+            padding: var(--space-2);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            background: white;
+            transition: all var(--duration-fast) var(--ease-out);
         }
 
         .deposit-option:hover {
-            border-color: #ddd6fe;
+            border-color: var(--border-strong);
         }
 
         .deposit-option.selected {
-            border-color: #8b5cf6;
-            background: #f5f3ff;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.08);
+            border-color: var(--accent);
+            background: var(--accent-muted);
         }
 
         .deposit-option-value {
-            font-size: 16px;
+            font-size: var(--text-base);
             font-weight: 700;
-            color: #1e1b4b;
+            color: var(--text-primary);
         }
 
         .deposit-option-label {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 4px;
-            font-weight: 500;
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            margin-top: 2px;
         }
 
-        .custom-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #eef2f6;
-            border-radius: 10px;
-            font-size: 16px;
+        /* Image Picker */
+        .image-picker {
+            display: flex;
+            gap: var(--space-1);
+            flex-wrap: wrap;
         }
 
-        .custom-input:focus {
-            outline: none;
-            border-color: #8b5cf6;
+        .image-option {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--text-base);
+            background: var(--bg-elevated);
+            transition: all var(--duration-fast) var(--ease-out);
         }
 
-        
+        .image-option:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-strong);
+        }
+
+        .image-option.selected {
+            border-color: var(--accent);
+            background: var(--accent-muted);
+        }
+
+        /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 80px 20px;
-            background: white;
-            border-radius: 24px;
-            border: 2px dashed #ede9fe;
-            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.03);
+            padding: var(--space-7) var(--space-3);
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px dashed var(--border);
             max-width: 500px;
-            margin: 40px auto;
+            margin: var(--space-5) auto;
         }
 
         .empty-state-icon {
-            font-size: 54px;
-            margin-bottom: 20px;
-            display: inline-block;
-            animation: pulse 2s infinite alternate;
+            font-size: 48px;
+            margin-bottom: var(--space-3);
+            opacity: 0.5;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.08); }
-        }
-
-        .empty-state h3 {
-            font-size: 20px;
-            color: #1e1b4b;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-
-        .empty-state p {
-            font-size: 14px;
-            color: #6b7280;
-        }
-
-        
+        /* Modal Delete Button */
         .modal-delete-btn {
-            background: #fee2e2;
-            color: #dc2626;
-            border: none;
+            background: var(--error-bg);
+            color: var(--error);
+            border: 1px solid var(--error-border);
             padding: 12px 20px;
-            border-radius: 10px;
+            border-radius: var(--radius-md);
             font-weight: 600;
             cursor: pointer;
-            font-size: 14px;
+            font-size: var(--text-sm);
             margin-right: auto;
-            transition: all 0.2s;
+            transition: all var(--duration-fast) var(--ease-out);
         }
 
         .modal-delete-btn:hover {
-            background: #dc2626;
+            background: var(--error);
             color: white;
         }
 
-        
+        /* ─────────────────────────────────────────────────────────────
+           RESPONSIVE
+           ───────────────────────────────────────────────────────────── */
         @media (max-width: 768px) {
-            nav {
-                padding: 12px 16px;
-            }
-            .nav-container {
-                flex-direction: column;
-                height: auto;
-                gap: 12px;
-                padding: 4px 0;
-            }
-            .logo {
-                font-size: 20px;
-            }
-            .nav-links {
-                width: 100%;
-                justify-content: center;
-                flex-wrap: wrap;
-                gap: 4px;
-            }
-            .nav-links a {
-                padding: 6px 12px;
-                font-size: 14px;
-            }
-            .user-info {
-                width: 100%;
-                justify-content: space-between;
-                border-top: 1px solid rgba(139, 92, 246, 0.05);
-                padding-top: 10px;
-                margin-top: 4px;
-            }
-            main {
-                padding: 24px 16px;
-                padding-bottom: 120px;
-            }
-            h1 {
-                font-size: 22px;
-                margin-bottom: 20px;
-                text-align: center;
-            }
             .cards-grid {
                 grid-template-columns: 1fr;
-                gap: 16px;
+                gap: var(--space-2);
             }
-            .modal {
-                width: 95%;
-                margin: 10px;
+
+            .modal-body,
+            .modal-header,
+            .modal-footer {
+                padding: var(--space-2);
             }
-            .modal-header, .modal-body, .modal-footer {
-                padding: 16px;
-            }
+
             .image-picker {
                 gap: 6px;
                 justify-content: center;
             }
+
             .image-option {
                 width: 40px;
                 height: 40px;
-                font-size: 20px;
+                font-size: var(--text-sm);
             }
+
             .deposit-options {
                 flex-direction: column;
-                gap: 8px;
+                gap: var(--space-1);
             }
+
             .modal-footer {
                 flex-direction: column-reverse;
-                gap: 8px;
+                gap: var(--space-1);
             }
-            .modal-footer button, .modal-footer .modal-delete-btn {
+
+            .modal-footer button,
+            .modal-footer .modal-delete-btn {
                 width: 100%;
                 margin: 0;
-                text-align: center;
             }
         }
     </style>
@@ -769,38 +345,34 @@
 <body>
     <nav>
         <div class="nav-container">
-            <div class="logo">SavingsTracker</div>
+            <div class="logo">Multi<span>Tracker</span></div>
             <div class="nav-links">
-                <a href="cards.html" class="active">Cards</a>
-                <a href="dashboard.html">Dashboard</a>
+                <a href="tasks.html">Tasks</a>
+                <a href="schedule.html">Schedule</a>
+                <a href="notes.html">Notes</a>
+                <a href="savings.html" class="active">Savings</a>
                 <a href="profile.html">Profile</a>
-            </div>
-            <div class="user-info">
-                <span class="user-name" id="userName"></span>
-                <button class="logout-btn" onclick="logout()">Sign Out</button>
             </div>
         </div>
     </nav>
 
     <main>
         <h1>Your Savings Goals</h1>
-        <div class="cards-grid" id="cardsGrid">
-            
-        </div>
+        <div class="cards-grid" id="cardsGrid"></div>
 
         <div class="empty-state" id="emptyState" style="display: none;">
-            <div class="empty-state-icon">🏖️</div>
+            <div class="empty-state-icon">🎯</div>
             <h3>No savings goals yet</h3>
-            <p>Click the purple floating button below to create your first goal.</p>
+            <p>Click the button below to create your first goal.</p>
         </div>
     </main>
 
-    
+    <!-- FAB -->
     <button class="add-btn" onclick="openCreateModal()">
         <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
     </button>
 
-    
+    <!-- Create/Edit Modal -->
     <div class="modal-overlay" id="createModal" onclick="if(event.target === this) closeCreateModal()">
         <div class="modal">
             <div class="modal-header">
@@ -814,9 +386,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Icon/Image</label>
+                    <label>Icon</label>
                     <div class="image-picker" id="imagePicker">
-                        <div class="image-option selected" data-emoji="🏖️">🏖️</div>
+                        <div class="image-option selected" data-emoji="🎯">🎯</div>
                         <div class="image-option" data-emoji="🚗">🚗</div>
                         <div class="image-option" data-emoji="🏠">🏠</div>
                         <div class="image-option" data-emoji="💻">💻</div>
@@ -838,19 +410,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Notes/Description</label>
+                    <label>Notes</label>
                     <textarea id="goalNotes" placeholder="What are you saving for?"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="modal-delete-btn" id="deleteBtn" style="display: none;" onclick="triggerDeleteGoal()">Delete Goal</button>
-                <button class="btn-cancel" onclick="closeCreateModal()">Cancel</button>
-                <button class="btn-create" id="saveBtn" onclick="saveGoal()">Create Goal</button>
+                <button class="btn-secondary" onclick="closeCreateModal()">Cancel</button>
+                <button class="btn-primary" id="saveBtn" onclick="saveGoal()">Create Goal</button>
             </div>
         </div>
     </div>
 
-    
+    <!-- Deposit Modal -->
     <div class="modal-overlay" id="depositModal" onclick="if(event.target === this) closeDepositModal()">
         <div class="modal">
             <div class="modal-header">
@@ -884,13 +456,13 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeDepositModal()">Cancel</button>
-                <button class="btn-create" onclick="makeDeposit()">Deposit</button>
+                <button class="btn-secondary" onclick="closeDepositModal()">Cancel</button>
+                <button class="btn-primary" onclick="makeDeposit()">Deposit</button>
             </div>
         </div>
     </div>
 
-    
+    <!-- Withdraw Modal -->
     <div class="modal-overlay" id="withdrawModal" onclick="if(event.target === this) closeWithdrawModal()">
         <div class="modal">
             <div class="modal-header">
@@ -902,11 +474,11 @@
                     <label>Withdrawal Amount (₱)</label>
                     <input type="number" class="custom-input" id="withdrawAmount" placeholder="Enter amount" min="1">
                 </div>
-                <p style="font-size: 14px; color: #6b7280;">Current balance: <strong id="currentBalance" style="color: #1e1b4b;">₱0</strong></p>
+                <p style="font-size: var(--text-sm); color: var(--text-secondary);">Current balance: <strong id="currentBalance" style="color: var(--text-primary);">₱0</strong></p>
             </div>
             <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeWithdrawModal()">Cancel</button>
-                <button class="btn-create" onclick="makeWithdrawal()">Withdraw</button>
+                <button class="btn-secondary" onclick="closeWithdrawModal()">Cancel</button>
+                <button class="btn-primary" onclick="makeWithdrawal()">Withdraw</button>
             </div>
         </div>
     </div>
@@ -942,16 +514,12 @@
 
         let goals = [];
         let currentGoalId = null;
-        let selectedEmoji = '🏖️';
+        let selectedEmoji = '🎯';
         let editingGoalId = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
             const user = await checkAuth()
             if (!user) return
-
-            const username = await getUsername()
-            document.getElementById('userName').textContent = '@' + username
-
             goals = await fetchGoals();
             renderGoals();
             setupImagePicker();
@@ -979,7 +547,7 @@
                     if (daysLeft < 0) {
                         deadlineHtml = `<div class="deadline-badge overdue">⏳ Overdue by ${Math.abs(daysLeft)} days</div>`;
                     } else if (daysLeft === 0) {
-                        deadlineHtml = `<div class="deadline-badge overdue" style="background:#fff7ed;color:#ea580c">⏳ Due today!</div>`;
+                        deadlineHtml = `<div class="deadline-badge overdue" style="background:var(--warning-bg);color:var(--warning);border-color:var(--warning-border);">⏳ Due today!</div>`;
                     } else {
                         deadlineHtml = `<div class="deadline-badge">⏳ ${daysLeft} days left</div>`;
                     }
@@ -990,7 +558,7 @@
                         <div class="card-image">
                             <div class="card-emoji-badge">${goal.emoji}</div>
                             <div class="card-settings" onclick="openEditModal('${goal.id}')">
-                                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+                                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
                             </div>
                         </div>
                         <div class="card-body">
@@ -1010,8 +578,8 @@
                             ${deadlineHtml}
 
                             <div class="card-actions">
-                                <button class="btn btn-deposit" onclick="openDepositModal('${goal.id}')">Deposit</button>
-                                <button class="btn btn-withdraw" onclick="openWithdrawModal('${goal.id}')">Withdraw</button>
+                                <button class="btn-primary" onclick="openDepositModal('${goal.id}')">Deposit</button>
+                                <button class="btn-withdraw" onclick="openWithdrawModal('${goal.id}')">Withdraw</button>
                             </div>
                         </div>
                     </div>
@@ -1043,7 +611,7 @@
             const picker = document.getElementById('imagePicker');
             picker.querySelectorAll('.image-option').forEach(o => o.classList.remove('selected'));
             picker.querySelector('.image-option').classList.add('selected');
-            selectedEmoji = '🏖️';
+            selectedEmoji = '🎯';
 
             const overlay = document.getElementById('createModal');
             overlay.style.display = 'flex';

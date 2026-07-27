@@ -3,167 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Account - SavingsTracker</title>
+    <title>Create Account - MultiTracker</title>
+    <link rel="stylesheet" href="/src/theme.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #faf8ff;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
-            position: relative;
-        }
-
-        
-        .blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            z-index: 1;
-            opacity: 0.5;
-            animation: float 20s infinite alternate ease-in-out;
-        }
-
-        .blob-1 {
-            width: 400px;
-            height: 400px;
-            background: #d8b4fe;
-            top: -100px;
-            left: -100px;
-            animation-delay: 0s;
-        }
-
-        .blob-2 {
-            width: 500px;
-            height: 500px;
-            background: #c084fc;
-            bottom: -150px;
-            right: -100px;
-            animation-delay: -5s;
-        }
-
-        .blob-3 {
-            width: 300px;
-            height: 300px;
-            background: #f472b6;
-            top: 50%;
-            left: 60%;
-            animation-delay: -10s;
-        }
-
-        @keyframes float {
-            0% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(60px, 40px) scale(1.15); }
-            100% { transform: translate(-40px, -60px) scale(0.9); }
+            background: var(--bg);
         }
 
         .container {
-            background: white;
-            padding: 40px;
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(107, 33, 168, 0.08);
+            background: var(--bg-card);
+            padding: var(--space-5);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
             width: 100%;
             max-width: 420px;
-            z-index: 10;
-            position: relative;
-            border: 1px solid rgba(139, 92, 246, 0.1);
-            animation: cardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes cardEntrance {
-            from { opacity: 0; transform: translateY(20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .logo-area {
-            text-align: center;
-            margin-bottom: 32px;
+            text-align: left;
+            margin-bottom: var(--space-4);
         }
 
         .logo-icon {
             font-size: 40px;
-            margin-bottom: 12px;
+            margin-bottom: var(--space-2);
             display: inline-block;
-            animation: bounce 3s infinite ease-in-out;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
+            color: var(--accent);
         }
 
         h1 {
-            color: #1e1b4b;
-            font-size: 28px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
+            font-size: var(--text-3xl);
         }
 
         .subtitle {
-            color: #6b7280;
-            font-size: 14px;
-            margin-top: 6px;
-        }
-
-        .form-group {
-            margin-bottom: 22px;
-            position: relative;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #4f46e5;
-            font-weight: 600;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        input {
-            width: 100%;
-            padding: 14px 18px;
-            border: 2px solid #eef2f6;
-            border-radius: 12px;
-            font-size: 16px;
-            color: #1e1b4b;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            background: #fafafa;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #8b5cf6;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            margin-top: var(--space-1);
         }
 
         button {
             width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-            color: white;
+            padding: 14px;
+            background: var(--accent);
+            color: var(--bg);
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
+            border-radius: var(--radius-md);
+            font-size: var(--text-base);
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.25);
-            margin-top: 8px;
+            transition: all var(--duration-fast) var(--ease-out);
+            margin-top: var(--space-1);
         }
 
         button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(139, 92, 246, 0.35);
+            background: var(--accent-hover);
+            transform: translateY(-1px);
         }
 
         button:active {
@@ -174,72 +72,60 @@
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
-            box-shadow: none;
         }
 
         .switch {
             text-align: center;
-            margin-top: 24px;
-            color: #6b7280;
-            font-size: 14px;
+            margin-top: var(--space-3);
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
         }
 
         .switch a {
-            color: #8b5cf6;
+            color: var(--accent);
             text-decoration: none;
             font-weight: 600;
-            transition: color 0.2s;
+            transition: color var(--duration-fast) var(--ease-out);
         }
 
         .switch a:hover {
-            color: #6366f1;
+            color: var(--accent-hover);
             text-decoration: underline;
         }
 
         .error-message {
-            background: #fef2f2;
-            color: #dc2626;
-            padding: 14px;
-            border-radius: 12px;
-            margin-bottom: 24px;
+            background: var(--error-bg);
+            color: var(--error);
+            padding: var(--space-2);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-3);
             display: none;
             text-align: center;
-            font-size: 14px;
+            font-size: var(--text-sm);
             font-weight: 500;
-            border: 1px solid #fee2e2;
-            animation: shake 0.4s ease-in-out;
+            border: 1px solid var(--error-border);
         }
 
         .success-message {
-            background: #ecfdf5;
-            color: #059669;
-            padding: 14px;
-            border-radius: 12px;
-            margin-bottom: 24px;
+            background: var(--success-bg);
+            color: var(--success);
+            padding: var(--space-2);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-3);
             display: none;
             text-align: center;
-            font-size: 14px;
+            font-size: var(--text-sm);
             font-weight: 500;
-            border: 1px solid #d1fae5;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-6px); }
-            75% { transform: translateX(6px); }
+            border: 1px solid var(--success-border);
         }
     </style>
 </head>
 <body>
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-
     <div class="container">
         <div class="logo-area">
-            <div class="logo-icon">🚀</div>
+            <div class="logo-icon">MT</div>
             <h1>Create Account</h1>
-            <p class="subtitle">Join SavingsTracker today</p>
+            <p class="subtitle">Join MultiTracker today</p>
         </div>
         <div id="errorMessage" class="error-message"></div>
         <div id="successMessage" class="success-message"></div>
@@ -305,7 +191,7 @@
                         successMessage.textContent = 'Account created successfully! Redirecting...'
                         successMessage.style.display = 'block'
                         setTimeout(() => {
-                            window.location.href = 'cards.html'
+                            window.location.href = 'tasks.html'
                         }, 1000)
                     }
                 } else {

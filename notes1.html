@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes - MultiTracker</title>
+    <link rel="stylesheet" href="/src/theme.css">
+    <link rel="stylesheet" href="/src/nav.css">
+    <style>
+        .shell {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: var(--space-3) var(--space-3) var(--space-8);
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: var(--space-3);
+            height: calc(100vh - 64px);
+            min-height: 500px;
+        }
+
+        .list-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .list-toolbar {
+            padding: var(--space-2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .list-controls {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .chip-btn {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: var(--text-xs);
+            font-weight: 600;
+            color: var(--text-secondary);
+            background: var(--bg-elevated);
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--ease-out);
+        }
+
+        .chip-btn.active {
+            background: var(--accent-muted);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .note-list {
+            overflow-y: auto;
+            flex: 1;
+            padding: var(--space-1);
+        }
+
+        .note-row {
+            padding: var(--space-2);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            border: 1px solid transparent;
+            margin-bottom: 4px;
+            transition: all var(--duration-fast) var(--ease-out);
+            position: relative;
+        }
+
+        .note-row:hover {
+            background: var(--bg-hover);
+        }
+
+        .note-row.active {
+            background: var(--accent-muted);
+            border-color: var(--accent);
+        }
+
+        .note-row .nr-title {
+            font-size: var(--text-sm);
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .note-row .nr-snippet {
+            font-size: var(--text-xs);
+            color: var(--text-secondary);
+            margin-top: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .note-row .nr-meta {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            margin-top: 6px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .tag-pill {
+            background: var(--bg-elevated);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            font-size: 10px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+        }
+
+        .note-row-del {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            border: 1px solid var(--error-border);
+            background: var(--error-bg);
+            color: var(--error);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity var(--duration-fast) var(--ease-out);
+        }
+
+        .note-row:hover .note-row-del,
+        .note-row.active .note-row-del {
+            opacity: 1;
+        }
+
+        .list-empty {
+            text-align: center;
+            padding: var(--space-5) var(--space-2);
+            color: var(--text-muted);
+            font-size: var(--text-sm);
+        }
+
+        .editor-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .editor-empty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            gap: var(--space-1);
+            padding: var(--space-5);
+            text-align: center;
+        }
+
+        .editor-empty .big {
+            font-size: 48px;
+            opacity: 0.5;
+        }
+
+        .editor-head {
+            padding: var(--space-2);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .editor-head-row {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .back-btn {
+            display: none;
+            border: none;
+            background: var(--bg-elevated);
+            color: var(--accent);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            font-weight: 700;
+            font-size: var(--text-sm);
+            cursor: pointer;
+        }
+
+        #noteTitle {
+            flex: 1;
+            border: none;
+            font-size: var(--text-xl);
+            font-weight: 800;
+            color: var(--text-primary);
+            background: transparent;
+            min-width: 0;
+        }
+
+        #noteTitle:focus {
+            outline: none;
+        }
+
+        .save-status {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .save-status.saving {
+            color: var(--warning);
+        }
+
+        .save-status.saved {
+            color: var(--success);
+        }
+
+        .editor-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .editor-actions .icon-btn {
+            border: 1px solid var(--border);
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            font-size: var(--text-sm);
+            font-weight: 700;
+            cursor: pointer;
+            transition: background var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+        }
+
+        .editor-actions .icon-btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-strong);
+            color: var(--text-primary);
+        }
+
+        .editor-actions .icon-btn.active {
+            background: var(--accent-muted);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            padding: var(--space-1) var(--space-2);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-elevated);
+        }
+
+        .toolbar button {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 800;
+            font-size: var(--text-sm);
+            cursor: pointer;
+            transition: background var(--duration-fast) var(--ease-out);
+        }
+
+        .toolbar button:hover {
+            background: var(--bg-hover);
+        }
+
+        .toolbar button:active {
+            transform: scale(0.95);
+        }
+
+        #noteEditor {
+            flex: 1;
+            padding: var(--space-3);
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: var(--text-base);
+            line-height: var(--leading-relaxed);
+            outline: none;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        #noteEditor:focus {
+            outline: none;
+        }
+
+        #noteEditor[data-placeholder]:empty::before {
+            content: attr(data-placeholder);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        #noteEditor ul,
+        #noteEditor ol {
+            padding-left: var(--space-4);
+            margin: var(--space-1) 0;
+        }
+
+        #noteEditor li {
+            margin: 4px 0;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 4px 0;
+        }
+
+        .check-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+            flex-shrink: 0;
+            margin-top: 2px;
+            cursor: pointer;
+        }
+
+        .check-item.done span {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        .tags-row {
+            padding: var(--space-2);
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: var(--space-2);
+            align-items: center;
+            background: var(--bg-elevated);
+        }
+
+        .tags-row label {
+            font-size: var(--text-xs);
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .tags-row input {
+            flex: 1;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            font-size: var(--text-sm);
+            color: var(--text-primary);
+            background: var(--bg);
+        }
+
+        .tags-row input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .add-btn {
+            position: fixed;
+            bottom: var(--space-4);
+            right: var(--space-4);
+            width: 56px;
+            height: 56px;
+            border: none;
+            border-radius: var(--radius-full);
+            background: var(--accent);
+            color: var(--bg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+            z-index: var(--z-sticky);
+        }
+
+        .add-btn:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .add-btn:active {
+            transform: scale(0.95);
+        }
+
+        .add-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        @media (max-width: 900px) {
+            .shell {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+                height: calc(100vh - 64px);
+            }
+
+            .list-panel {
+                position: fixed;
+                top: 64px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: var(--z-modal);
+                border-radius: 0;
+                border: none;
+                transform: translateX(-100%);
+                transition: transform var(--duration-normal) var(--ease-out-expo);
+            }
+
+            .list-panel.open {
+                transform: translateX(0);
+            }
+
+            .back-btn {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .add-btn {
+                bottom: var(--space-3);
+                right: var(--space-3);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Multi<span>Tracker</span></div>
+            <div class="nav-links">
+                <a href="tasks.html">Tasks</a>
+                <a href="schedule.html">Schedule</a>
+                <a href="notes.html" class="active">Notes</a>
+                <a href="savings.html">Savings</a>
+                <a href="profile.html">Profile</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="shell" id="shell">
+        <aside class="list-panel" id="listPanel">
+            <div class="list-toolbar">
+                <input type="search" id="searchInput" placeholder="Search notes..." oninput="renderList()">
+                <div class="list-controls">
+                    <select id="sortSelect" onchange="renderList()">
+                        <option value="latest">Latest</option>
+                        <option value="alpha">A-Z</option>
+                    </select>
+                    <button class="chip-btn active" id="filterActive" onclick="setFilter('active')">Active</button>
+                    <button class="chip-btn" id="filterPinned" onclick="setFilter('pinned')">Pinned</button>
+                    <button class="chip-btn" id="filterArchived" onclick="setFilter('archived')">Archived</button>
+                </div>
+            </div>
+            <div class="note-list" id="noteList"></div>
+        </aside>
+
+        <section class="editor-panel" id="editorPanel">
+            <div class="editor-empty" id="editorEmpty">
+                <div class="big">📝</div>
+                <h3>No note selected</h3>
+                <p>Pick a note from the list or tap + to create one.</p>
+            </div>
+
+            <div id="editorMain" style="display:none;flex-direction:column;flex:1;min-height:0;">
+                <div class="editor-head">
+                    <div class="editor-head-row">
+                        <button class="back-btn" onclick="closeEditorMobile()">← Back</button>
+                        <input type="text" id="noteTitle" placeholder="Title" oninput="queueSave()" onblur="flushSaveSoon()">
+                    </div>
+                    <div class="editor-actions">
+                        <button class="icon-btn" id="pinBtn" onclick="togglePinBtn()">📌 Pin</button>
+                        <button class="icon-btn" id="archiveBtn" onclick="toggleArchiveBtn()">📦 Archive</button>
+                        <button class="icon-btn" style="color:var(--error);border-color:var(--error-border);" onclick="deleteCurrentNote()">🗑️ Delete</button>
+                        <span class="save-status" id="saveStatus"></span>
+                    </div>
+                </div>
+                <div class="toolbar">
+                    <button type="button" onclick="fmt('bold')" title="Bold"><b>B</b></button>
+                    <button type="button" onclick="fmt('italic')" title="Italic"><i>I</i></button>
+                    <button type="button" onclick="fmt('underline')" title="Underline"><u>U</u></button>
+                    <button type="button" onclick="fmt('insertUnorderedList')" title="Bullets">•</button>
+                    <button type="button" onclick="fmt('insertOrderedList')" title="Numbered">1.</button>
+                    <button type="button" onclick="insertChecklist()" title="Checklist">☑</button>
+                    <button type="button" onclick="fmt('undo')" title="Undo">↶</button>
+                    <button type="button" onclick="fmt('redo')" title="Redo">↷</button>
+                </div>
+                <div id="noteEditor" contenteditable="true" data-placeholder="Start writing..." oninput="queueSave()" onblur="flushSaveSoon()" onkeydown="queueSave()"></div>
+                <div class="tags-row">
+                    <label>Tags</label>
+                    <input type="text" id="noteTags" placeholder="comma, separated, tags" oninput="queueSave()" onblur="flushSaveSoon()">
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <button class="add-btn" onclick="createNewNote()" title="New note">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+    </button>
+
+    <script type="module">
+        import { supabase } from './src/supabaseClient.js'
+        import { requireAuth } from './src/auth.js'
+        import { fetchNotes, createNote, updateNote, deleteNote, togglePin, toggleArchive } from './src/notes.js'
+
+        // ============================
+        // Local State
+        // ============================
+        let notes = []
+        let activeId = null
+        let filterMode = 'active'
+        let saveTimer = null
+        let dirty = false
+        const SAVE_DEBOUNCE_MS = 800
+
+        // ============================
+        // Utility Functions
+        // ============================
+
+        /**
+         * Escape HTML special characters to prevent XSS
+         */
+        function escapeHtml(str) {
+            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+        }
+
+        /**
+         * Strip HTML tags and return plain text
+         */
+        function stripHtml(html) {
+            const d = document.createElement('div')
+            d.innerHTML = html || ''
+            return (d.textContent || d.innerText || '').trim()
+        }
+
+        /**
+         * Allowed HTML tags for notes content
+         */
+        const ALLOWED_NOTE_TAGS = new Set(['B', 'I', 'U', 'UL', 'OL', 'LI', 'DIV', 'BR', 'SPAN', 'P', 'STRONG', 'EM', 'INPUT'])
+
+        /**
+         * Sanitize HTML to prevent XSS - only allows safe tags and attributes
+         */
+        function sanitizeHtml(html) {
+            const doc = new DOMParser().parseFromString(`<div>${html || ''}</div>`, 'text/html')
+            const root = doc.body.firstChild
+            return sanitizeNode(root).innerHTML
+        }
+
+        function sanitizeNode(node) {
+            if (!node) return document.createTextNode('')
+            if (node.nodeType === 3) return document.createTextNode(node.textContent)
+            if (!ALLOWED_NOTE_TAGS.has(node.tagName)) {
+                const frag = document.createDocumentFragment()
+                node.childNodes.forEach(c => frag.appendChild(sanitizeNode(c)))
+                return frag
+            }
+            const el = document.createElement(node.tagName)
+            if (node.tagName === 'INPUT' && node.type === 'checkbox') {
+                el.type = 'checkbox'
+                el.dataset.checkId = node.dataset.checkId
+                el.checked = node.checked
+                el.className = node.className
+            }
+            // Preserve allowed attributes for DIV/SPAN
+            if ((node.tagName === 'DIV' || node.tagName === 'SPAN') && node.className) {
+                el.className = node.className
+            }
+            if (node.tagName === 'DIV' && node.dataset.checkId) {
+                el.dataset.checkId = node.dataset.checkId
+            }
+            node.childNodes.forEach(c => el.appendChild(sanitizeNode(c)))
+            return el
+        }
+
+        /**
+         * Extract checklist items from editor HTML
+         * Returns array of { id, text, completed }
+         */
+        function extractChecklist() {
+            const items = []
+            document.querySelectorAll('#noteEditor .check-item').forEach(item => {
+                const checkbox = item.querySelector('input[type="checkbox"]')
+                const span = item.querySelector('span')
+                if (checkbox && span) {
+                    items.push({
+                        id: checkbox.dataset.checkId || '',
+                        text: span.textContent || '',
+                        completed: checkbox.checked
+                    })
+                }
+            })
+            return items
+        }
+
+        /**
+         * Parse comma-separated tags string into array
+         */
+        function parseTags(tagsStr) {
+            return (tagsStr || '')
+                .split(',')
+                .map(t => t.trim())
+                .filter(Boolean)
+        }
+
+        /**
+         * Format relative time (just now, 5m ago, 3h ago, 2d ago, or localized date)
+         */
+        function relativeTime(isoString) {
+            if (!isoString) return ''
+            const date = new Date(isoString)
+            if (isNaN(date.getTime())) return ''
+            const now = new Date()
+            const diffMs = now - date
+            const diffSec = Math.floor(diffMs / 1000)
+            const diffMin = Math.floor(diffSec / 60)
+            const diffHour = Math.floor(diffMin / 60)
+            const diffDay = Math.floor(diffHour / 24)
+
+            if (diffSec < 30) return 'just now'
+            if (diffMin < 60) return `${diffMin}m ago`
+            if (diffHour < 24) return `${diffHour}h ago`
+            if (diffDay < 7) return `${diffDay}d ago`
+            return date.toLocaleDateString()
+        }
+
+        // ============================
+        // Rendering
+        // ============================
+
+        function renderList() {
+            const container = document.getElementById('noteList')
+            const search = document.getElementById('searchInput').value.trim().toLowerCase()
+            const sort = document.getElementById('sortSelect').value
+
+            let filtered = notes.filter(n => {
+                if (filterMode === 'active' && n.isArchived) return false
+                if (filterMode === 'pinned' && (!n.isPinned || n.isArchived)) return false
+                if (filterMode === 'archived' && !n.isArchived) return false
+                const haystack = `${n.title || ''} ${stripHtml(n.contentHtml || '')} ${(n.tags || []).join(' ')}`.toLowerCase()
+                return !search || haystack.includes(search)
+            })
+
+            if (sort === 'alpha') {
+                filtered = [...filtered].sort((a, b) => (a.title || '').localeCompare(b.title || ''))
+            } else {
+                filtered = [...filtered].sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
+            }
+
+            container.innerHTML = filtered.map(n => `
+                <div class="note-row${n.id === activeId ? ' active' : ''}" onclick="selectNote('${n.id}')">
+                    ${n.isPinned ? '<span>📌</span>' : ''}
+                    <div class="nr-title">${escapeHtml(n.title || 'Untitled')}</div>
+                    <div class="nr-snippet">${stripHtml(n.contentHtml || '')}</div>
+                    <div class="nr-meta">
+                        ${n.isPinned ? '<span>Pinned</span>' : ''}
+                        ${n.isArchived ? '<span>Archived</span>' : ''}
+                        ${n.updatedAt ? '<span>' + relativeTime(n.updatedAt) + '</span>' : ''}
+                        ${(n.tags || []).slice(0, 3).map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('')}
+                    </div>
+                    <button class="note-row-del" onclick="event.stopPropagation(); deleteNoteById('${n.id}')" title="Delete">🗑️</button>
+                </div>
+            `).join('')
+        }
+
+        function showEditor(show) {
+            document.getElementById('editorEmpty').style.display = show ? 'none' : 'flex'
+            document.getElementById('editorMain').style.display = show ? 'flex' : 'none'
+            document.getElementById('shell').classList.toggle('editing', !!show && !!activeId)
+
+            // On mobile, show/hide sidebar
+            const listPanel = document.getElementById('listPanel')
+            if (window.innerWidth <= 900) {
+                listPanel.classList.toggle('open', show)
+            }
+        }
+
+        // ============================
+        // Note Selection & Editor
+        // ============================
+
+        window.selectNote = (id) => {
+            if (dirty && activeId) flushSave()
+            activeId = id
+            const n = notes.find(x => x.id === id)
+            if (!n) return
+            document.getElementById('noteTitle').value = n.title
+            document.getElementById('noteEditor').innerHTML = n.contentHtml || ''
+            document.getElementById('noteTags').value = (n.tags || []).join(', ')
+            document.getElementById('pinBtn').classList.toggle('active', n.isPinned)
+            document.getElementById('archiveBtn').classList.toggle('active', n.isArchived)
+            document.getElementById('pinBtn').textContent = n.isPinned ? '📌 Pinned' : '📌 Pin'
+            document.getElementById('archiveBtn').textContent = n.isArchived ? '📦 Archived' : '📦 Archive'
+            document.getElementById('saveStatus').textContent = ''
+            showEditor(true)
+            bindChecklistHandlers()
+            renderList()
+        }
+
+        window.closeEditorMobile = () => {
+            if (dirty && activeId) flushSave()
+            activeId = null
+            showEditor(false)
+            document.getElementById('shell').classList.remove('editing')
+            renderList()
+        }
+
+        // ============================
+        // Create Note
+        // ============================
+
+        window.createNewNote = async () => {
+            if (dirty && activeId) await flushSave()
+            const res = await createNote({ title: 'Untitled', contentHtml: '' })
+            if (!res.success) { alert(res.error || 'Failed to create'); return }
+            notes = await fetchNotes()
+            selectNote(res.note.id)
+            document.getElementById('noteTitle').focus()
+            document.getElementById('noteTitle').select()
+        }
+
+        // ============================
+        // Rich Text Editor Commands
+        // ============================
+
+        window.fmt = (cmd) => {
+            document.getElementById('noteEditor').focus()
+            document.execCommand(cmd, false, null)
+            queueSave()
+        }
+
+        window.insertChecklist = () => {
+            const id = 'c_' + Math.random().toString(36).slice(2, 9)
+            document.getElementById('noteEditor').focus()
+            const html = `<div class="check-item" data-check-id="${id}"><input type="checkbox" data-check-id="${id}"><span>Checklist item</span></div><div><br></div>`
+            document.execCommand('insertHTML', false, html)
+            bindChecklistHandlers()
+            queueSave()
+        }
+
+        function bindChecklistHandlers() {
+            document.querySelectorAll('#noteEditor input[type="checkbox"]').forEach(cb => {
+                cb.onchange = () => {
+                    const wrap = cb.closest('.check-item')
+                    if (wrap) wrap.classList.toggle('done', cb.checked)
+                    queueSave()
+                }
+            })
+        }
+
+        // ============================
+        // Pin / Archive / Delete
+        // ============================
+
+        window.togglePinBtn = async () => {
+            if (!activeId) return
+            const n = notes.find(x => x.id === activeId)
+            if (!n) return
+            const res = await togglePin(activeId, !n.isPinned)
+            if (!res.success) { alert(res.error || 'Failed'); return }
+            notes = await fetchNotes()
+            selectNote(activeId)
+        }
+
+        window.toggleArchiveBtn = async () => {
+            if (!activeId) return
+            const n = notes.find(x => x.id === activeId)
+            if (!n) return
+            const res = await toggleArchive(activeId, !n.isArchived)
+            if (!res.success) { alert(res.error || 'Failed'); return }
+            notes = await fetchNotes()
+            if (filterMode === 'active' && res.note.isArchived) {
+                activeId = null
+                showEditor(false)
+                renderList()
+            } else {
+                selectNote(activeId)
+            }
+        }
+
+        async function removeNoteById(id) {
+            if (!confirm('Delete this note?')) return
+            const res = await deleteNote(id)
+            if (!res.success) { alert(res.error || 'Failed'); return }
+            notes = await fetchNotes()
+            if (activeId === id) {
+                activeId = null
+                showEditor(false)
+            }
+            renderList()
+        }
+
+        window.deleteCurrentNote = async () => {
+            await removeNoteById(activeId)
+        }
+
+        window.setFilter = (mode) => {
+            filterMode = mode
+            document.getElementById('filterActive').classList.toggle('active', mode === 'active')
+            document.getElementById('filterPinned').classList.toggle('active', mode === 'pinned')
+            document.getElementById('filterArchived').classList.toggle('active', mode === 'archived')
+            if (mode === 'active' && activeId) {
+                const n = notes.find(x => x.id === activeId)
+                if (n?.isArchived) {
+                    activeId = null
+                    showEditor(false)
+                }
+            }
+            renderList()
+        }
+
+        // ============================
+        // Autosave System
+        // ============================
+
+        function queueSave() {
+            if (!activeId) return
+            dirty = true
+            const statusEl = document.getElementById('saveStatus')
+            statusEl.textContent = 'Unsaved…'
+            statusEl.className = 'save-status'
+            clearTimeout(saveTimer)
+            saveTimer = setTimeout(flushSave, SAVE_DEBOUNCE_MS)
+        }
+
+        function flushSaveSoon() {
+            if (!activeId || !dirty) return
+            clearTimeout(saveTimer)
+            saveTimer = setTimeout(flushSave, 50)
+        }
+
+        async function flushSave() {
+            if (!activeId || !dirty) return
+            dirty = false
+            clearTimeout(saveTimer)
+
+            const payload = {
+                title: document.getElementById('noteTitle').value.trim() || 'Untitled',
+                contentHtml: sanitizeHtml(document.getElementById('noteEditor').innerHTML),
+                checklist: extractChecklist(),
+                tags: parseTags(document.getElementById('noteTags').value)
+            }
+
+            try {
+                console.log('[autosave] payload', payload)
+                const res = await updateNote(activeId, payload)
+                if (!res.success) {
+                    dirty = true
+                    document.getElementById('saveStatus').textContent = 'Failed: ' + (res.error || 'unknown')
+                    document.getElementById('saveStatus').className = 'save-status'
+                    console.error('[autosave] update failed', res.error)
+                    return
+                }
+                console.log('[autosave] success', res.note?.id)
+
+                // Update local cache instead of refetching
+                const noteIndex = notes.findIndex(x => x.id === activeId)
+                if (noteIndex !== -1) {
+                    notes[noteIndex] = res.note
+                }
+
+                // Preserve cursor position if content hasn't changed
+                const currentHtml = document.getElementById('noteEditor').innerHTML
+                document.getElementById('noteTitle').value = res.note.title
+                if (currentHtml !== (res.note.contentHtml || '')) {
+                    const sel = window.getSelection()
+                    const range = sel?.rangeCount ? sel.getRangeAt(0) : null
+                    const editor = document.getElementById('noteEditor')
+                    let offset = range ? range.endOffset : null
+                    editor.innerHTML = res.note.contentHtml || ''
+                    bindChecklistHandlers()
+                    if (offset !== null && editor.firstChild) {
+                        try {
+                            const newRange = document.createRange()
+                            const node = editor.firstChild
+                            newRange.setStart(node, Math.min(offset, node.textContent.length))
+                            newRange.collapse(true)
+                            sel.removeAllRanges()
+                            sel.addRange(newRange)
+                        } catch (e) {}
+                    }
+                }
+
+                document.getElementById('noteTags').value = (res.note.tags || []).join(', ')
+
+                document.getElementById('saveStatus').textContent = 'Saved'
+                document.getElementById('saveStatus').className = 'save-status saved'
+                setTimeout(() => {
+                    const s = document.getElementById('saveStatus')
+                    if (s && s.textContent === 'Saved') {
+                        s.textContent = ''
+                        s.className = 'save-status'
+                    }
+                }, 1500)
+            } catch (err) {
+                dirty = true
+                document.getElementById('saveStatus').textContent = 'Error'
+                document.getElementById('saveStatus').className = 'save-status'
+                console.error('[autosave] exception', err)
+            }
+        }
+
+        function forceSave() {
+            clearTimeout(saveTimer)
+            return flushSave()
+        }
+
+        // Auto-flush on visibility change, Ctrl+S, before unload
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden' && dirty && activeId) forceSave()
+        })
+
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault()
+                forceSave()
+            }
+        })
+
+        window.addEventListener('beforeunload', () => {
+            if (dirty && activeId) forceSave()
+        })
+
+        // Expose deleteNoteById for inline delete buttons
+        window.deleteNoteById = removeNoteById
+
+        // ============================
+        // Initialization
+        // ============================
+
+        async function init() {
+            await requireAuth()
+            notes = await fetchNotes()
+            renderList()
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.actions-menu')) {
+                    document.querySelectorAll('.actions-menu[aria-expanded="true"]').forEach(m => m.setAttribute('aria-expanded', 'false'))
+                }
+            })
+        }
+
+        init()
+    </script>
+</body>
+</html>

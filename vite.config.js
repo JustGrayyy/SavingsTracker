@@ -7,8 +7,10 @@ export default defineConfig({
         main: 'index.html',
         signin: 'signin.html',
         login: 'login.html',
-        cards: 'cards.html',
-        dashboard: 'dashboard.html',
+        tasks: 'tasks.html',
+        schedule: 'schedule.html',
+        notes: 'notes.html',
+        savings: 'savings.html',
         profile: 'profile.html'
       }
     }
